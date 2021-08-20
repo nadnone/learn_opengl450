@@ -1,6 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <string>
+#include <vector>
 
 
 
@@ -38,9 +39,9 @@ int main(void)
 
     // triangle vertices
     float vertices_triangle[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f,  0.5f, 0.0f
+        -1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        0.0f,  1.0f, 0.0f
     };
 
 
@@ -63,7 +64,7 @@ int main(void)
     */
 
     //vertexshader
-    const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 aPos;\nvoid main()\n{\ngl_Position = vec4(aPos.x, aPos, y, aPos.z, 1.0f);\n}";
+    const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 aPos;\nvoid main()\n{\ngl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n}";
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexshaderGLSL, NULL);
@@ -76,31 +77,55 @@ int main(void)
     glCompileShader(fragmentShader);
 
 
-    /*
-        Shader Program
-    */
+    /* CHECK SHADER COMPILE ERROR */
 
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
+    GLint isCompiled = 0;
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
+    if(isCompiled == GL_FALSE) 
+    {
+        GLint maxLength = 0;
+        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
 
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
+        // The maxLength includes the NULL character
+        std::vector<GLchar> errorLog(maxLength);
+        glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &errorLog[0]);
 
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+        // Provide the infolog in whatever manor you deem best.
+        // Exit with failure.
+        glDeleteShader(fragmentShader); // Don't leak the shader.
+        return 1;
+    }
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
+    if (isCompiled == GL_FALSE)
+    {
+        GLint maxLength = 0;
+        glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
 
-    /* *********************** */
+        // The maxLength includes the NULL character
+        std::vector<GLchar> errorLog(maxLength);
+        glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &errorLog[0]);
+
+        // Provide the infolog in whatever manor you deem best.
+        // Exit with failure.
+        glDeleteShader(vertexShader); // Don't leak the shader.
+        return 1;
+    }
+
+
+    /* ********************************************************** */
+
+
+
+
+  
 
 
    
 
 
 
-    glViewport(0, 0, 800, 800);
+    glViewport(0, 0, 640, 480);
 
 
 
@@ -110,8 +135,26 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        /*
+            Shader Program
+        */
 
-        // draw the triangle
+        unsigned int shaderProgram;
+        shaderProgram = glCreateProgram();
+
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+        glLinkProgram(shaderProgram);
+
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+
+        /* *********************** */
+
+        /* draw the triangle */
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
