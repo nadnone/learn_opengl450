@@ -1,9 +1,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <string>
 #include <vector>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-
+#include <iostream>
+#include <thread>
+#include <chrono>
 
 int main(void)
 {
@@ -53,18 +57,15 @@ int main(void)
     glGenBuffers(1, &VBO);
 
 
-    // bind the VBO
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_triangle), vertices_triangle, GL_STATIC_DRAW);
-
-
 
     /*
     GLSL vertex shaderand fragment shader
     */
 
     //vertexshader
-    const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 aPos;\nvoid main()\n{\ngl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n}";
+    //const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 aPos;\nvoid main()\n{\ngl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n}";
+    const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 modelPos;\nuniform mat4 MVP;\nvoid main()\n{\ngl_Position = MVP * vec4(modelPos, 1.0f);\n}";
+
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexshaderGLSL, NULL);
@@ -116,43 +117,69 @@ int main(void)
     /* ********************************************************** */
 
 
+    // Attach and link shader
+
+    unsigned int shaderProgram;
+    shaderProgram = glCreateProgram();
+
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    /* ***************************** */
 
 
-  
 
-
-   
-
-
-
-    glViewport(0, 0, 640, 480);
+    //glViewport(0, 0, 640, 480);
 
 
 
     /* Loop until the user closes the window */
+    int deltaTickLoop = 0;
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // bind the VBO
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_triangle), vertices_triangle, GL_STATIC_DRAW);
+
+
         /*
             Shader Program
         */
 
-        unsigned int shaderProgram;
-        shaderProgram = glCreateProgram();
-
-        glAttachShader(shaderProgram, vertexShader);
-        glAttachShader(shaderProgram, fragmentShader);
-        glLinkProgram(shaderProgram);
-
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
 
         /* *********************** */
+
+
+
+
+        /* Matrix transformations */
+
+        glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (640.0f / 480.0f), 0.1f, 100.0f);
+
+        // Camera
+        glm::mat4 View = glm::lookAt(glm::vec3(0, 0, -3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+
+
+        glm::mat4 Model = glm::mat4(1.0f);
+        Model = glm::rotate(Model, glm::radians((float)deltaTickLoop), glm::vec3(1, 1, 1));
+
+
+        glm::mat4 ModelViewProjection = Projection * View * Model;
+        
+        // send to shader
+        GLuint MatrixID = glGetUniformLocation(shaderProgram, "MVP");
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ModelViewProjection));
+
 
         /* draw the triangle */
         glUseProgram(shaderProgram);
@@ -165,6 +192,11 @@ int main(void)
 
         /* Poll for and process events */
         glfwPollEvents();
+
+
+        // increament delte Tick Loop
+        deltaTickLoop++;
+        if (deltaTickLoop >= 360) deltaTickLoop = 0;
     }
 
 
