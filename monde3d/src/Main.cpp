@@ -48,16 +48,16 @@ int main(void)
     glEnable(GL_DEPTH);
 
 
-    ObjReader cube("E:/Users/nadir/Documents/GitHub/learn_opengl450/Assets/cube.obj");
+    ObjReader cube("E:/Users/nadir/Documents/GitHub/learn_opengl450/Assets/cube.obj", 0);
+    ObjReader sphere("E:/Users/nadir/Documents/GitHub/learn_opengl450/Assets/sphere.obj", 1);
 
-    std::vector<float> vector_vertices_cube = cube.getVertices();
-
+    /*
     // create the buffers
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
     unsigned int VBO;
     glGenBuffers(1, &VBO);
-
+    */
 
 
     /*
@@ -146,50 +146,74 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
+
+
+
+        // clear buffer
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // bind the VBO
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vector_vertices_cube.size() * sizeof(float), vector_vertices_cube.data(), GL_STATIC_DRAW);
-
-
-        /*
-            Shader Program
-        */
-
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        /* *********************** */
 
 
 
 
-        /* Matrix transformations */
+        /*  transformations matrices */
 
         glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (640.0f / 480.0f), 0.1f, 100.0f);
 
         // Camera
-        glm::mat4 View = glm::lookAt(glm::vec3(0, 0, -10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        glm::mat4 View = glm::lookAt(glm::vec3(0, 0, -20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
+
+        GLuint MatrixID = glGetUniformLocation(shaderProgram, "MVP");
+
+
+
+
+
+
+
+        /* sphere transformation */
 
         glm::mat4 Model = glm::mat4(1.0f);
-        Model = glm::rotate(Model, glm::radians((float)deltaTickLoop), glm::vec3(1, 1, 1));
+        //Model = glm::rotate(Model, glm::radians((float)deltaTickLoop), glm::vec3(1, 1, 1));
 
-        //Model = glm::translate(Model, glm::vec3(translationLoop, 0.0f, 0.0f));
+        Model = glm::translate(Model, glm::vec3(5.0f, 0.0f, 0.0f));
 
         glm::mat4 ModelViewProjection = Projection * View * Model;
-        
+
         // send to shader
-        GLuint MatrixID = glGetUniformLocation(shaderProgram, "MVP");
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ModelViewProjection));
 
 
-        /* draw the triangle */
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, vector_vertices_cube.size()/3 );
+        /* ********************* */
+
+
+
+        cube.draw(shaderProgram);
+
+
+
+
+
+        /* cube transformation */
+
+        Model = glm::mat4(1.0f);
+        Model = glm::rotate(Model, glm::radians((float)deltaTickLoop), glm::vec3(1, 1, 1));
+        //Model = glm::translate(Model, glm::vec3(translationLoop, 0.0f, 0.0f));
+
+        ModelViewProjection = Projection * View * Model;
+        
+        // send to shader
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ModelViewProjection));
+
+        /* ************************** */
+
+
+        sphere.draw(shaderProgram);
+
+
+
+
 
 
         /* Swap front and back buffers */
@@ -205,13 +229,13 @@ int main(void)
         if (deltaTickLoop >= 360) deltaTickLoop = 0;
         
 
-
+        /*
         if (translationLoop < -5) translationLoopB = true;
         else if(translationLoop > 5) translationLoopB = false;
 
         if (translationLoopB) translationLoop++;
         else translationLoop--;
-
+        */
     }
 
 
