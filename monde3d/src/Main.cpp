@@ -175,7 +175,7 @@ int main(void)
 
 
         glm::mat4 Model = glm::mat4(1.0f);
-        Model = glm::rotate(Model, glm::radians((float)deltaTickLoop), glm::vec3(0, 1, 0));
+        Model = glm::rotate(Model, glm::radians((float)deltaTickLoop), glm::vec3(1, 1, 1));
 
         //Model = glm::translate(Model, glm::vec3(translationLoop, 0.0f, 0.0f));
 

@@ -5,4 +5,4 @@
 
 
 ## Demo
-![spinning triangle](./readme_res/spinning_triangle.gif)
+![spinning triangle](./readme_res/demo.gif)
