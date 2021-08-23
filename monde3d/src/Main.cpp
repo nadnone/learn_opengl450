@@ -44,21 +44,14 @@ int main(void)
     /* load GL */
     gladLoadGL();
 
-
-    // triangle vertices
-    float vertices_triangle[] = {
-        -1.0f, -1.0f, 0.0f,        -1.0f, 1.0f, 0.0f,        1.0f,  -1.0f, 0.0f, //triangle 1
-
-        1.0f, -1.0f, 0.0f,        -1.0f, 1.0f, 0.0f,        1.0f,  1.0f, 0.0f  //triangle 2
-
-
-    };
+    // depth testing
+    glEnable(GL_DEPTH);
 
 
     ObjReader cube("E:/Users/nadir/Documents/GitHub/learn_opengl450/Assets/cube.obj");
 
+    std::vector<float> vector_vertices_cube = cube.getVertices();
 
-    
     // create the buffers
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
@@ -157,7 +150,7 @@ int main(void)
 
         // bind the VBO
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_triangle), vertices_triangle, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vector_vertices_cube.size() * sizeof(float), vector_vertices_cube.data(), GL_STATIC_DRAW);
 
 
         /*
@@ -182,9 +175,9 @@ int main(void)
 
 
         glm::mat4 Model = glm::mat4(1.0f);
-        Model = glm::rotate(Model, glm::radians((float)deltaTickLoop), glm::vec3(1, 1, 1));
+        Model = glm::rotate(Model, glm::radians((float)deltaTickLoop), glm::vec3(0, 1, 0));
 
-        Model = glm::translate(Model, glm::vec3(translationLoop, 0.0f, 0.0f));
+        //Model = glm::translate(Model, glm::vec3(translationLoop, 0.0f, 0.0f));
 
         glm::mat4 ModelViewProjection = Projection * View * Model;
         
@@ -196,7 +189,7 @@ int main(void)
         /* draw the triangle */
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLES, 0, vector_vertices_cube.size()/3 );
 
 
         /* Swap front and back buffers */
