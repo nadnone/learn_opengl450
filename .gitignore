@@ -365,3 +365,4 @@ FodyWeavers.xsd
 monde3d/include
 monde3d/lib
 monde3d/src/glad.c
+*.mtl
