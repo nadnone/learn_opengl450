@@ -2,9 +2,11 @@
 
 layout (location = 0) in vec3 modelPos;
 
-uniform mat4 MVP;
+uniform mat4 Model;
+uniform mat4 ViewProjection;
+
 
 void main()
 {
-	gl_Position = MVP * vec4(modelPos, 1.0f);
+	gl_Position = Model * ViewProjection * vec4(modelPos, 1.0f);
 }

@@ -11,8 +11,11 @@ public:
 	ObjReader(const char * filename, unsigned int id);
 	~ObjReader();
 
+	glm::mat4 translate(glm::vec3 translation_direction, glm::mat4 Model_in);
+	glm::mat4 rotate(float angle, glm::mat4 Model_in, glm::vec3 axe);
+
 	std::vector<float> getVertices();
-	void draw(unsigned int shaderProgram);
+	void draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in);
 
 private:
 	std::vector<glm::vec3> data_vertices_coord;
@@ -21,6 +24,8 @@ private:
 	unsigned int vbo;
 	unsigned int vao;
 	unsigned int id_obj;
+	glm::mat4 Model;
+	glm::mat4 ViewProjection;
 };
 
 
@@ -30,6 +35,11 @@ private:
 
 ObjReader::ObjReader(const char * filename, unsigned int id)
 {
+
+
+	Model = glm::mat4(1.0f);
+
+
 
 	// create the buffers
 	glGenVertexArrays(1, &vao);
@@ -115,8 +125,12 @@ std::vector<float> ObjReader::getVertices()
 	return vertices_vector_total;
 }
 
-void ObjReader::draw(unsigned int shaderProgram) 
+
+
+
+void ObjReader::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 {
+	ViewProjection = ViewProjection_in;
 
 	// bind the VBO
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -134,9 +148,41 @@ void ObjReader::draw(unsigned int shaderProgram)
 	/* *********************** */
 
 
+
+
+	/* transformation */
+
+
 	glUseProgram(shaderProgram);
+
+	GLuint MatrixID = glGetUniformLocation(shaderProgram, "Model");
+
+	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(Model));
+
+	MatrixID = glGetUniformLocation(shaderProgram, "ViewProjection");
+
+	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ViewProjection));
+
+
+	//draw
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLES, 0, vertices_vector_total.size() / 3);
+
+}
+
+
+
+glm::mat4 ObjReader::translate(glm::vec3 translation_direction, glm::mat4 Model_in)
+{
+	Model = glm::translate(Model_in, translation_direction);
+	return Model;
+
+}
+
+glm::mat4 ObjReader::rotate(float angle, glm::mat4 Model_in, glm::vec3 axe)
+{
+	Model = glm::rotate(Model_in, angle, axe);
+	return Model;
 
 }
 

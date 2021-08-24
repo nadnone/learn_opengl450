@@ -49,7 +49,8 @@ int main(void)
 
 
     ObjReader cube("E:/Users/nadir/Documents/GitHub/learn_opengl450/Assets/cube.obj", 0);
-    ObjReader sphere("E:/Users/nadir/Documents/GitHub/learn_opengl450/Assets/sphere.obj", 1);
+    ObjReader cube_2("E:/Users/nadir/Documents/GitHub/learn_opengl450/Assets/cube.obj", 1);
+    ObjReader cube_3("E:/Users/nadir/Documents/GitHub/learn_opengl450/Assets/cube.obj", 2);
 
     /*
     // create the buffers
@@ -66,7 +67,7 @@ int main(void)
 
     //vertexshader
     //const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 aPos;\nvoid main()\n{\ngl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n}";
-    const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 modelPos;\nuniform mat4 MVP;\nvoid main()\n{\ngl_Position = MVP * vec4(modelPos, 1.0f);\n}";
+    const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 modelPos;\nuniform mat4 Model;\nuniform mat4 ViewProjection;\nvoid main()\n{\ngl_Position = ViewProjection * Model * vec4(modelPos, 1.0f);\n}";
 
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -140,8 +141,8 @@ int main(void)
 
 
     /* Loop until the user closes the window */
-    int deltaTickLoop = 0;
-    int translationLoop = 5;
+    float deltaTickLoop = 0;
+    float translationLoop = 5;
     bool translationLoopB = false;
     while (!glfwWindowShouldClose(window))
     {
@@ -154,65 +155,30 @@ int main(void)
 
 
 
-
-
         /*  transformations matrices */
 
         glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (640.0f / 480.0f), 0.1f, 100.0f);
 
         // Camera
-        glm::mat4 View = glm::lookAt(glm::vec3(0, 0, -20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-
-
-        GLuint MatrixID = glGetUniformLocation(shaderProgram, "MVP");
+        glm::mat4 View = glm::lookAt(glm::vec3(0, 0, -35), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 
 
 
 
-
-
-        /* sphere transformation */
-
-        glm::mat4 Model = glm::mat4(1.0f);
-        //Model = glm::rotate(Model, glm::radians((float)deltaTickLoop), glm::vec3(1, 1, 1));
-
-        Model = glm::translate(Model, glm::vec3(5.0f, 0.0f, 0.0f));
-
-        glm::mat4 ModelViewProjection = Projection * View * Model;
-
-        // send to shader
-        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ModelViewProjection));
-
-
-        /* ********************* */
+        glm::mat4 Model = cube.translate(glm::vec3(translationLoop, 0.0f, 0.0f), glm::mat4(1.0f));
+        Model = cube.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(1, 0, 0));
+        cube.draw(shaderProgram, Projection * View);
 
 
 
-        cube.draw(shaderProgram);
+        Model = cube_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
+        Model = cube_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));
+        cube_2.draw(shaderProgram, Projection * View);
 
 
-
-
-
-        /* cube transformation */
-
-        Model = glm::mat4(1.0f);
-        Model = glm::rotate(Model, glm::radians((float)deltaTickLoop), glm::vec3(1, 1, 1));
-        //Model = glm::translate(Model, glm::vec3(translationLoop, 0.0f, 0.0f));
-
-        ModelViewProjection = Projection * View * Model;
-        
-        // send to shader
-        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ModelViewProjection));
-
-        /* ************************** */
-
-
-        sphere.draw(shaderProgram);
-
-
-
+        Model = cube_3.rotate(deltaTickLoop/3.1415f/10.0f, glm::mat4(1.0f), glm::vec3(1, 1, 1));
+        cube_3.draw(shaderProgram, Projection * View);
 
 
 
@@ -229,13 +195,13 @@ int main(void)
         if (deltaTickLoop >= 360) deltaTickLoop = 0;
         
 
-        /*
-        if (translationLoop < -5) translationLoopB = true;
-        else if(translationLoop > 5) translationLoopB = false;
+        
+        if (translationLoop < -20) translationLoopB = true;
+        else if(translationLoop > 20) translationLoopB = false;
 
-        if (translationLoopB) translationLoop++;
-        else translationLoop--;
-        */
+        if (translationLoopB) translationLoop+=0.2f;
+        else translationLoop-=0.2f;
+        
     }
 
 
