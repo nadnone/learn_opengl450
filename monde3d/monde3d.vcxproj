@@ -27,7 +27,10 @@
     <Text Include="vertexshader.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="headers\GameLoop.h" />
+    <ClInclude Include="headers\Input_event.h" />
     <ClInclude Include="headers\ObjReader.h" />
+    <ClInclude Include="headers\Shader.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

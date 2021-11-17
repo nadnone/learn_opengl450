@@ -1,15 +1,9 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <vector>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <thread>
 #include <chrono>
 
-#include "ObjReader.h"
-
-
+#include "Shader.h"
+#include "GameLoop.h"
+#include "Input_event.h"
 
 int main(void)
 {
@@ -50,152 +44,23 @@ int main(void)
     glEnable(GL_DEPTH);
 
     
-    ObjReader cube("./Assets/cube.obj");
-    ObjReader sphere_2("./Assets/sphere.obj");
-    ObjReader cube_3("./Assets/cube.obj");
+
     
-
-
-    /*
-    GLSL vertex shaderand fragment shader
-    */
-
-    //vertexshader
-    //const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 aPos;\nvoid main()\n{\ngl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n}";
-    const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 modelPos;\nuniform mat4 Model;\nuniform mat4 ViewProjection;\nvoid main()\n{\ngl_Position = ViewProjection * Model * vec4(modelPos, 1.0f);\n}";
-
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexshaderGLSL, NULL);
-    glCompileShader(vertexShader);
-    
-    const char* fragmentshaderGLSL = "#version 450 core\nout vec4 color;\nvoid main()\n{\ncolor = vec4(0.5568f, 0.2470f, 0.7490f, 1.0f);\n}";
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentshaderGLSL, NULL);
-    glCompileShader(fragmentShader);
-
-
-    /* CHECK SHADER COMPILE ERROR */
-
-    GLint isCompiled = 0;
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
-    if(isCompiled == GL_FALSE) 
-    {
-        GLint maxLength = 0;
-        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-        // The maxLength includes the NULL character
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &errorLog[0]);
-
-        // Exit with failure.
-        glDeleteShader(fragmentShader); // Don't leak the shader.
-        return 1;
-    }
-
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
-    if (isCompiled == GL_FALSE)
-    {
-        GLint maxLength = 0;
-        glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-        // The maxLength includes the NULL character
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &errorLog[0]);
-
-        // Exit with failure.
-        glDeleteShader(vertexShader); // Don't leak the shader.
-        return 1;
-    }
-
-
-    /* ********************************************************** */
-
-
-    // Attach and link shader
-
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    /* ***************************** */
+    //Get the shader program id
+    Shader_Compilation shader_compiler = Shader_Compilation();
+    unsigned int shaderProgram = shader_compiler.getShaderProgramID();
 
 
 
     //glViewport(0, 0, 640, 480);
 
+    // run the game loop
+    GameLoop gameloop = GameLoop();
+    gameloop.run(window, shaderProgram);
 
 
-    /* Loop until the user closes the window */
-    float deltaTickLoop = 0;
-    float translationLoop = 5;
-    bool translationLoopB = false;
-    while (!glfwWindowShouldClose(window))
-    {
-        /* Render here */
-
-
-
-        // clear buffer
-        glClear(GL_COLOR_BUFFER_BIT);
-
-
-        
-        /*  transformations matrices */
-
-        glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (640.0f / 480.0f), 0.1f, 100.0f);
-
-        // Camera
-        glm::mat4 View = glm::lookAt(glm::vec3(0, 0, -10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-
-
-
-
-        
-        glm::mat4 Model = cube.translate(glm::vec3(translationLoop, 0.0f, 0.0f), glm::mat4(1.0f));
-        Model = cube.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(1, 0, 0));
-     
-        cube.draw(shaderProgram, Projection * View);
-        
-        Model = sphere_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
-        Model = sphere_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));
-        sphere_2.draw(shaderProgram, Projection * View);
-
-
-        Model = cube_3.rotate(deltaTickLoop/3.1415f/10.0f, glm::mat4(1.0f), glm::vec3(1, 1, 1));
-        cube_3.draw(shaderProgram, Projection * View);
-        
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
-
-
-        // increament delta Tick Loop
-        deltaTickLoop++;
-
-        if (deltaTickLoop >= 360) deltaTickLoop = 0;
-        
-
-        
-        if (translationLoop < -5) translationLoopB = true;
-        else if(translationLoop > 5) translationLoopB = false;
-
-        if (translationLoopB) translationLoop+=0.2f;
-        else translationLoop-=0.2f;
-        
-    }
-
-
+   
+    // end the program
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;

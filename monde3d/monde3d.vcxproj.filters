@@ -28,5 +28,14 @@
     <ClInclude Include="headers\ObjReader.h">
       <Filter>header</Filter>
     </ClInclude>
+    <ClInclude Include="headers\Input_event.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\GameLoop.h">
+      <Filter>header</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\Shader.h">
+      <Filter>header</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
