@@ -4,15 +4,15 @@
     <Filter Include="src">
       <UniqueIdentifier>{f6d6ba65-36e0-499c-9957-c90c1eeb3834}</UniqueIdentifier>
     </Filter>
-    <Filter Include="headers">
-      <UniqueIdentifier>{734601ea-fca6-45c5-87f3-2ed5c1be81f4}</UniqueIdentifier>
+    <Filter Include="header">
+      <UniqueIdentifier>{335643ea-f053-4c9f-8d72-e5f2c72f0406}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\glad.c">
+    <ClCompile Include="src\Main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Main.cpp">
+    <ClCompile Include="src\glad.c">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -26,7 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\ObjReader.h">
-      <Filter>headers</Filter>
+      <Filter>header</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

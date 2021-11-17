@@ -8,7 +8,7 @@
 class ObjReader
 {
 public:
-	ObjReader(const char * filename, unsigned int id);
+	ObjReader(const char * filename);
 	~ObjReader();
 
 	glm::mat4 translate(glm::vec3 translation_direction, glm::mat4 Model_in);
@@ -21,9 +21,7 @@ private:
 	std::vector<glm::vec3> data_vertices_coord;
 	std::vector<std::vector<std::vector<int>>> faces_data;
 	std::vector<float> vertices_vector_total;
-	unsigned int vbo;
-	unsigned int vao;
-	unsigned int id_obj;
+	unsigned int vbo, vao;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;
 };
@@ -33,21 +31,13 @@ private:
 
 
 
-ObjReader::ObjReader(const char * filename, unsigned int id)
+ObjReader::ObjReader(const char * filename)
 {
-
-
+	ViewProjection = glm::mat4(0.0f);
 	Model = glm::mat4(1.0f);
 
-
-
-	// create the buffers
-	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
-
-	id_obj = id;
-
-
+	glGenVertexArrays(1, &vao);
 
 	std::fstream ObjFile(filename);
 
@@ -59,7 +49,7 @@ ObjReader::ObjReader(const char * filename, unsigned int id)
 
 	// get the faces
 	std::vector<std::vector<int>> faces_vertices_lines;
-	int block_split_data[] = {0,0,0};
+	int block_split_data[3] = {0,0,0};
 
 	while (!ObjFile.eof())
 	{
@@ -111,9 +101,9 @@ ObjReader::ObjReader(const char * filename, unsigned int id)
 		for (int j = 0; j < faces_data[i].size(); j++)
 		{
 
-			vertices_vector_total.push_back(data_vertices_coord[(int)(faces_data[i][j][0] - 1)].x);
-			vertices_vector_total.push_back(data_vertices_coord[(int)(faces_data[i][j][0] - 1)].y);
-			vertices_vector_total.push_back(data_vertices_coord[(int)(faces_data[i][j][0] - 1)].z);
+			vertices_vector_total.push_back(data_vertices_coord[(faces_data[i][j][0] - (int)1)].x);
+			vertices_vector_total.push_back(data_vertices_coord[(faces_data[i][j][0] - (int)1)].y);
+			vertices_vector_total.push_back(data_vertices_coord[(faces_data[i][j][0] - (int)1)].z);
 
 		}
 	}
@@ -128,9 +118,16 @@ std::vector<float> ObjReader::getVertices()
 
 
 
+
+
+
 void ObjReader::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 {
 	ViewProjection = ViewProjection_in;
+
+	// bind the vao
+	glBindVertexArray(vao);
+
 
 	// bind the VBO
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -163,13 +160,13 @@ void ObjReader::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ViewProjection));
 
+	/* *********************  */
+
 
 	//draw
-	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, vertices_vector_total.size() / 3);
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices_vector_total.size() / 3);
 
 }
-
 
 
 glm::mat4 ObjReader::translate(glm::vec3 translation_direction, glm::mat4 Model_in)

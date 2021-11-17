@@ -1,11 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <vector>
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <iostream>
 #include <thread>
 #include <chrono>
 
@@ -19,7 +17,10 @@ int main(void)
 
     /* Initialize the library */
     if (!glfwInit())
-        return -1;
+    {
+        printf("Init glfw error\n");
+        return 1;
+    }
 
 
     /* which version we use */
@@ -34,8 +35,9 @@ int main(void)
 
     if (!window)
     {
+        printf("Window creating error\n");
         glfwTerminate();
-        return -1;
+        return 1;
     }
 
     /* Make the window's context current */
@@ -47,18 +49,11 @@ int main(void)
     // depth testing
     glEnable(GL_DEPTH);
 
-
-    ObjReader cube("E:/Users/nadir/Documents/GitHub/learn_opengl450/Assets/cube.obj", 0);
-    ObjReader cube_2("E:/Users/nadir/Documents/GitHub/learn_opengl450/Assets/cube.obj", 1);
-    ObjReader cube_3("E:/Users/nadir/Documents/GitHub/learn_opengl450/Assets/cube.obj", 2);
-
-    /*
-    // create the buffers
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    */
+    
+    ObjReader cube("./Assets/cube.obj");
+    ObjReader sphere_2("./Assets/sphere.obj");
+    ObjReader cube_3("./Assets/cube.obj");
+    
 
 
     /*
@@ -94,7 +89,6 @@ int main(void)
         std::vector<GLchar> errorLog(maxLength);
         glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &errorLog[0]);
 
-        // Provide the infolog in whatever manor you deem best.
         // Exit with failure.
         glDeleteShader(fragmentShader); // Don't leak the shader.
         return 1;
@@ -110,7 +104,6 @@ int main(void)
         std::vector<GLchar> errorLog(maxLength);
         glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &errorLog[0]);
 
-        // Provide the infolog in whatever manor you deem best.
         // Exit with failure.
         glDeleteShader(vertexShader); // Don't leak the shader.
         return 1;
@@ -154,33 +147,31 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
 
-
+        
         /*  transformations matrices */
 
         glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (640.0f / 480.0f), 0.1f, 100.0f);
 
         // Camera
-        glm::mat4 View = glm::lookAt(glm::vec3(0, 0, -35), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        glm::mat4 View = glm::lookAt(glm::vec3(0, 0, -10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 
 
 
-
+        
         glm::mat4 Model = cube.translate(glm::vec3(translationLoop, 0.0f, 0.0f), glm::mat4(1.0f));
         Model = cube.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(1, 0, 0));
+     
         cube.draw(shaderProgram, Projection * View);
-
-
-
-        Model = cube_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
-        Model = cube_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));
-        cube_2.draw(shaderProgram, Projection * View);
+        
+        Model = sphere_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
+        Model = sphere_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));
+        sphere_2.draw(shaderProgram, Projection * View);
 
 
         Model = cube_3.rotate(deltaTickLoop/3.1415f/10.0f, glm::mat4(1.0f), glm::vec3(1, 1, 1));
         cube_3.draw(shaderProgram, Projection * View);
-
-
+        
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -196,8 +187,8 @@ int main(void)
         
 
         
-        if (translationLoop < -20) translationLoopB = true;
-        else if(translationLoop > 20) translationLoopB = false;
+        if (translationLoop < -5) translationLoopB = true;
+        else if(translationLoop > 5) translationLoopB = false;
 
         if (translationLoopB) translationLoop+=0.2f;
         else translationLoop-=0.2f;
