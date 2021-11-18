@@ -4,7 +4,7 @@
     <Filter Include="src">
       <UniqueIdentifier>{f6d6ba65-36e0-499c-9957-c90c1eeb3834}</UniqueIdentifier>
     </Filter>
-    <Filter Include="header">
+    <Filter Include="headers">
       <UniqueIdentifier>{335643ea-f053-4c9f-8d72-e5f2c72f0406}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -26,16 +26,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\ObjReader.h">
-      <Filter>header</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="headers\Input_event.h">
-      <Filter>header</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="headers\GameLoop.h">
-      <Filter>header</Filter>
+      <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="headers\Shader.h">
-      <Filter>header</Filter>
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\Misc.h">
+      <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

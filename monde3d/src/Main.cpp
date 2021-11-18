@@ -3,7 +3,6 @@
 
 #include "Shader.h"
 #include "GameLoop.h"
-#include "Input_event.h"
 
 int main(void)
 {
@@ -59,9 +58,6 @@ int main(void)
     gameloop.run(window, shaderProgram);
 
 
-   
-    // end the program
-    glfwDestroyWindow(window);
-    glfwTerminate();
-    return 0;
+
+    Misc().exitProgram(window);
 }

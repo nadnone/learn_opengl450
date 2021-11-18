@@ -29,6 +29,7 @@
   <ItemGroup>
     <ClInclude Include="headers\GameLoop.h" />
     <ClInclude Include="headers\Input_event.h" />
+    <ClInclude Include="headers\Misc.h" />
     <ClInclude Include="headers\ObjReader.h" />
     <ClInclude Include="headers\Shader.h" />
   </ItemGroup>

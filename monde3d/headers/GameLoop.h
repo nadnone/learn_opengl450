@@ -18,6 +18,7 @@ public:
     GameLoop();
     ~GameLoop();
     void run(GLFWwindow* window_in, unsigned int shaderProgram_in);
+
 private:
     float deltaTickLoop = 0;
     float translationLoop = 5;
@@ -30,9 +31,11 @@ private:
 
     double lastmovementTime = 0;
 
-    glm::vec3 velocity = glm::vec3(0.0f);
+    mouse_keyboard camera_Pos_Angle;
 
     const float MIN_FPX = 1.0f / 60.0f;
+
+    GLFWwindow* window;
 
 };
 
@@ -44,8 +47,9 @@ GameLoop::~GameLoop()
 {
 }
 
-void GameLoop::run(GLFWwindow* window, unsigned int shaderProgram_in)
+void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
 {
+    window = window_in;
     shaderProgram = shaderProgram_in;
 
     ObjReader cube("./Assets/cube.obj");
@@ -76,7 +80,7 @@ void GameLoop::run(GLFWwindow* window, unsigned int shaderProgram_in)
         if ((time - lastmovementTime) >= MIN_FPX)
         {
             // INPUT EVENTS
-            velocity = inputs.getMovement();
+            camera_Pos_Angle = inputs.getMovement();
             /* ********************* */
         }
         
@@ -89,21 +93,24 @@ void GameLoop::run(GLFWwindow* window, unsigned int shaderProgram_in)
         Projection = glm::perspective(glm::radians(45.0f), (640.0f / 480.0f), 0.1f, 100.0f);
 
         // Camera
-        //View = glm::lookAt(glm::vec3(0, 0, -10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-        
-        // Move camera
-        View = glm::lookAt(velocity, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        // 
+        // Translation
+        glm::vec3 normalized = glm::normalize(camera_Pos_Angle.position);
+        View = glm::lookAt(camera_Pos_Angle.position, camera_Pos_Angle.position - (normalized * camera_Pos_Angle.position) , glm::vec3(0.0f, 1.0f, 0.0f));
+        // Rotation
+        View = glm::rotate(View, camera_Pos_Angle.angle.x, glm::vec3(1.0f, 0.0f, 0.0f)); // haut bas
+        View = glm::rotate(View, camera_Pos_Angle.angle.y, glm::vec3(0.0f, 1.0f, 0.0f)); // gauche droite
+        /* ********************* */
 
 
 
 
-        glm::mat4 Model = cube.translate(glm::vec3(translationLoop, 0.0f, 0.0f), glm::mat4(1.0f));
+        glm::mat4 Model = cube.translate(glm::vec3(translationLoop, 0.0f, 5.0f), glm::mat4(1.0f));
         Model = cube.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(1, 0, 0));
-
         cube.draw(shaderProgram, Projection * View);
 
-        Model = sphere_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
-        Model = sphere_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));
+        //Model = sphere_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
+        //Model = sphere_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));
         sphere_2.draw(shaderProgram, Projection * View);
 
 
@@ -141,4 +148,5 @@ void GameLoop::run(GLFWwindow* window, unsigned int shaderProgram_in)
 
 
 }
+
 
