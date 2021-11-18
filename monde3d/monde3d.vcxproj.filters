@@ -40,5 +40,8 @@
     <ClInclude Include="headers\Misc.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="headers\MapParser.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

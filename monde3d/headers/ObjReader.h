@@ -127,6 +127,8 @@ void ObjReader::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 {
 	ViewProjection = ViewProjection_in;
 
+	glUseProgram(shaderProgram);
+
 	// bind the vao
 	glBindVertexArray(vao);
 
@@ -152,7 +154,6 @@ void ObjReader::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 	/* transformation */
 
 
-	glUseProgram(shaderProgram);
 
 	GLuint MatrixID = glGetUniformLocation(shaderProgram, "Model");
 

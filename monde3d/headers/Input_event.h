@@ -69,7 +69,7 @@ mouse_keyboard Input_Event::getMovement()
 
 	// calcule de la direction
 	input_return.direction.x = cos(glm::radians(input_return.angle.x)) * cos(glm::radians(input_return.angle.y));
-	input_return.direction.y = sin(glm::radians(input_return.angle.y));
+	input_return.direction.y = -sin(glm::radians(input_return.angle.y));
 	input_return.direction.z = sin(glm::radians(input_return.angle.x)) * cos(glm::radians(input_return.angle.y));
 	input_return.camFront = glm::normalize(input_return.direction);
 

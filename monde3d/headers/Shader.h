@@ -24,14 +24,44 @@ Shader_Compilation::Shader_Compilation()
 
     //vertexshader
     //const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 aPos;\nvoid main()\n{\ngl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n}";
-    const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 modelPos;\nuniform mat4 Model;\nuniform mat4 ViewProjection;\nvoid main()\n{\ngl_Position = ViewProjection * Model * vec4(modelPos, 1.0f);\n}";
+            const char* vertexshaderGLSL = R"glsl(
+                #version 450 core
 
+                layout(location = 0) in vec3 modelPos;
+                layout(location = 1) in vec3 colorDataIn;
+
+                uniform mat4 Model;
+                uniform mat4 ViewProjection;
+
+                out vec3 colorData;
+
+                void main()
+                {
+
+                    gl_Position = ViewProjection * Model * vec4(modelPos, 1.0f);
+                    colorData = colorDataIn;
+
+                }
+                )glsl";
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexshaderGLSL, NULL);
     glCompileShader(vertexShader);
 
-    const char* fragmentshaderGLSL = "#version 450 core\nout vec4 color;\nvoid main()\n{\ncolor = vec4(0.5568f, 0.2470f, 0.7490f, 1.0f);\n}";
+    const char* fragmentshaderGLSL = R"glsl(
+                #version 450 core
+
+                in vec3 colorsData;
+                out vec4 color;
+
+                void main()
+                {
+	                color = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+                }
+        )glsl";
+        
+    // TODO Afficher les couleurs à l'écran
+
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentshaderGLSL, NULL);
@@ -53,7 +83,7 @@ Shader_Compilation::Shader_Compilation()
 
         // Exit with failure.
         glDeleteShader(fragmentShader); // Don't leak the shader.
-        return;
+        exit(2);
     }
 
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
@@ -68,7 +98,7 @@ Shader_Compilation::Shader_Compilation()
 
         // Exit with failure.
         glDeleteShader(vertexShader); // Don't leak the shader.
-        return;
+        exit(1);
     }
 
 
