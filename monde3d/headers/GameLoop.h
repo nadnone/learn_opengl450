@@ -94,12 +94,8 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
 
         // Camera
         // 
-        // Translation
-        glm::vec3 normalized = glm::normalize(camera_Pos_Angle.position);
-        View = glm::lookAt(camera_Pos_Angle.position, camera_Pos_Angle.position - (normalized * camera_Pos_Angle.position) , glm::vec3(0.0f, 1.0f, 0.0f));
-        // Rotation
-        View = glm::rotate(View, camera_Pos_Angle.angle.x, glm::vec3(1.0f, 0.0f, 0.0f)); // haut bas
-        View = glm::rotate(View, camera_Pos_Angle.angle.y, glm::vec3(0.0f, 1.0f, 0.0f)); // gauche droite
+        // Translation et rotation
+        View = glm::lookAt(camera_Pos_Angle.position, camera_Pos_Angle.position + camera_Pos_Angle.camFront, glm::vec3(0.0f, 1.0f, 0.0f));
         /* ********************* */
 
 

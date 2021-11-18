@@ -10,8 +10,10 @@
 
 
 struct mouse_keyboard {
-	glm::vec3 position = glm::vec3(0.0f, 0.0f, 10.0f);
-	glm::vec2 angle = glm::vec2(0.0f);
+	glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 direction = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec2 angle = glm::vec2(0.0f);	
+	glm::vec3 camFront = glm::vec3(0.0f);
 };
 
 class Input_Event
@@ -28,12 +30,10 @@ private:
 	int right = GLFW_KEY_D;
 	int left = GLFW_KEY_A;
 
-	glm::vec3 direction = glm::vec3(0.0f);
-
 	mouse_keyboard input_return;
 
-	const float SPEED = 1.0f/4.0f;
-	const float SENSIBILITY = 1.0f/4.0f;
+	const float SPEED = 0.25f;
+	const float SENSIVITY = 0.1f;
 
 	GLFWwindow* window = NULL;
 
@@ -48,23 +48,53 @@ Input_Event::Input_Event(GLFWwindow * window_in)
 
 mouse_keyboard Input_Event::getMovement()
 {
+
+	// Mouvement de la souris 
+	double x = 0.0f, y = 0.0f;
+	glfwGetCursorPos(window, &x, &y);
+
+	input_return.angle.x += x * SENSIVITY;
+	input_return.angle.y += y * SENSIVITY;
+
+
+	// max angle
+	if (input_return.angle.y < -70.0f)
+	{
+		input_return.angle.y = -70.0f;
+	}
+	if (input_return.angle.y > 70.0f)
+	{
+		input_return.angle.y = 70.0f;
+	}
+
+	// calcule de la direction
+	input_return.direction.x = cos(glm::radians(input_return.angle.x)) * cos(glm::radians(input_return.angle.y));
+	input_return.direction.y = sin(glm::radians(input_return.angle.y));
+	input_return.direction.z = sin(glm::radians(input_return.angle.x)) * cos(glm::radians(input_return.angle.y));
+	input_return.camFront = glm::normalize(input_return.direction);
+
+	glfwSetCursorPos(window, 0, 0);
+	/* ********************** */
+
+
+
 	if (glfwGetKey(window, forward) == GLFW_PRESS)
 	{
-		direction.z = -1;
+		input_return.position += SPEED * input_return.camFront;
 	}
 	else if (glfwGetKey(window, backward) == GLFW_PRESS)
 	{
-		direction.z = 1;
+		input_return.position -= SPEED * input_return.camFront;
 	}
 	else if (glfwGetKey(window, right) == GLFW_PRESS)
 	{
-		direction.x = 1;
+		input_return.position += SPEED * glm::normalize(glm::cross(input_return.camFront, glm::vec3(0.0f, 1.0f, 0.0f)));
 	}
 	else if (glfwGetKey(window, left) == GLFW_PRESS)
 	{
-		direction.x = -1;
-
+		input_return.position -= SPEED * glm::normalize(glm::cross(input_return.camFront, glm::vec3(0.0f, 1.0f, 0.0f)));
 	}
+
 
 
 	// quitter le programme
@@ -76,25 +106,8 @@ mouse_keyboard Input_Event::getMovement()
 
 
 
-	// Mouvement de la souris 
-	double x = 0.0f, y = 0.0f;
-	glfwGetCursorPos(window, &x, &y);
-
-	// reverse axes
-	input_return.angle.x += y * (3.1415f / 180.0f) * SENSIBILITY;
-	input_return.angle.y += x * (3.1415f / 180.0f) * SENSIBILITY;
-
-	//printf("after: %f %f\n", input_return.angle.x, input_return.angle.y);
-
-	glfwSetCursorPos(window, 0, 0);
-	/* ********************** */
 
 
-	// on calcule la vitesse gravité etc..
-	input_return.position.z += direction.z * SPEED;
-	input_return.position.x += direction.x * SPEED;
-
-	direction = glm::vec3(0.0f);
 
 	return input_return;
 }
