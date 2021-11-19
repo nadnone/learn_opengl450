@@ -369,3 +369,4 @@ monde3d/src/glad.c
 monde3d/Assets/map/heighmap_colored.png
 monde3d/Assets/map/heightmap.heightmap
 monde3d/Assets/map/heighmap_greyscale.png
+monde3d/Assets/map/heightmap.map_triangulated

@@ -11,6 +11,7 @@
 
 struct map_data {
 	std::vector<float> map_vertices;
+	std::vector<float> map_vertices;
 	std::vector<float> map_colors;
 };
 
@@ -52,52 +53,53 @@ MapParser::MapParser(char * filename)
 
 	float data = 0.0f;
 	float x = 0.0f,
+		y = 0.0f,
 		z = 0.0f;
 
 	while (!feof(file))
 	{
-		fscanf_s(file, "%f %f %f\n", &x, &data, &z);
+		fscanf_s(file, "%f %f %f C %f\n", &x, &y, &z, &data);
 
 		// x from plan = x from world
 		// y from plan = z from world
 		// data from plan = y from world
 		// generates planes
-		my_map_data.map_vertices.push_back(x);
-		my_map_data.map_vertices.push_back(data);
-		my_map_data.map_vertices.push_back(z);
+		my_map_data.map_vertices.push_back(x * 0.01);
+		my_map_data.map_vertices.push_back(y * 0.01);
+		my_map_data.map_vertices.push_back(z * 0.01);
 
 
 		for (int i = 0; i < 3; i++)
 		{
-			if (data < 0.0f)
+			if (data < -0.07f)
 			{
-				my_map_data.map_colors.push_back(.36f); // couleur de l'eau
-				my_map_data.map_colors.push_back(.128f); // couleur de l'eau
-				my_map_data.map_colors.push_back(.214f); // couleur de l'eau
+				my_map_data.map_colors.push_back(36.0f / 255); // couleur de l'eau
+				my_map_data.map_colors.push_back(128.0f / 255); // couleur de l'eau
+				my_map_data.map_colors.push_back(214.0f / 255); // couleur de l'eau
 			}
-			else if (data < 0.1f)
+			else if (data < 0.0f)
 			{
-				my_map_data.map_colors.push_back(.209f); // couleur du sable
-				my_map_data.map_colors.push_back(.206f); // couleur du sable
-				my_map_data.map_colors.push_back(.115f); // couleur du sable
+				my_map_data.map_colors.push_back(209.0f / 255); // couleur du sable
+				my_map_data.map_colors.push_back(206.0f / 255); // couleur du sable
+				my_map_data.map_colors.push_back(115.0f / 255); // couleur du sable
 			}
 			else if (data < 0.25f)
 			{
-				my_map_data.map_colors.push_back(.10f); // couleur de l'herbe
-				my_map_data.map_colors.push_back(.125f); // couleur de l'herbe
-				my_map_data.map_colors.push_back(.18f); // couleur de l'herbe
+				my_map_data.map_colors.push_back(10.0f / 255); // couleur de l'herbe
+				my_map_data.map_colors.push_back(125.0f / 255); // couleur de l'herbe
+				my_map_data.map_colors.push_back(18.0f / 255); // couleur de l'herbe
 			}
 			else if (data < 0.5f)
 			{
-				my_map_data.map_colors.push_back(.118f); // couleur de la pierre
-				my_map_data.map_colors.push_back(.120f); // couleur de la pierre
-				my_map_data.map_colors.push_back(.117f); // couleur de la pierre
+				my_map_data.map_colors.push_back(1180.f / 255); // couleur de la pierre
+				my_map_data.map_colors.push_back(1200.f / 255); // couleur de la pierre
+				my_map_data.map_colors.push_back(1170.f / 255); // couleur de la pierre
 			}
 			else if (data < 1.0f)
 			{
-				my_map_data.map_colors.push_back(.194f); // couleur de la neige
-				my_map_data.map_colors.push_back(.194f); // couleur de la neige
-				my_map_data.map_colors.push_back(.192f); // couleur de la neige
+				my_map_data.map_colors.push_back(194.0f / 255); // couleur de la neige
+				my_map_data.map_colors.push_back(194.0f / 255); // couleur de la neige
+				my_map_data.map_colors.push_back(192.0f / 255); // couleur de la neige
 			}
 
 		}
@@ -143,6 +145,7 @@ void MapParser::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 
 	// bind the VBO
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+	glBindVertexArray(color_buffer);
 	// bind des couleurs
 	glBufferData(GL_ARRAY_BUFFER, my_map_data.map_colors.size() * sizeof(float), my_map_data.map_colors.data(), GL_STATIC_DRAW);
 
@@ -152,6 +155,8 @@ void MapParser::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 	glEnableVertexAttribArray(1);
 
 	/* *********************** */
+
+	// TODO bind indices
 
 
 	/* transformation */

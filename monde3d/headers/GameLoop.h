@@ -61,16 +61,12 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
     Input_Event inputs(window);
 
     // initialisation de la map
-    MapParser map((char*)"./Assets/map/heightmap.heightmap");
+    MapParser map((char*)"./Assets/map/heightmap.map_triangulated");
 
     while (!glfwWindowShouldClose(window))
     {
 
       
-
-
-
-
 
         /* Render here */
 
