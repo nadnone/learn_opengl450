@@ -61,7 +61,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
     Input_Event inputs(window);
 
     // initialisation de la map
-    MapParser map((char*)"./Assets/map/heightmap_verticecs.data_map");
+    MapParser map((char*)"./Assets/map/grayscale_heightmap.png");
     map.prepare_to_draw(shaderProgram);
 
     while (!glfwWindowShouldClose(window))

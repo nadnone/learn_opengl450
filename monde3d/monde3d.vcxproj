@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\lodepng.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>

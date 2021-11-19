@@ -367,3 +367,4 @@ monde3d/lib
 monde3d/src/glad.c
 *.mtl
 *.data_map
+monde3d/src/lodepng.cpp

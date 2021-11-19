@@ -33,13 +33,13 @@ Shader_Compilation::Shader_Compilation()
                 uniform mat4 Model;
                 uniform mat4 ViewProjection;
 
-                out vec3 colorData;
+                out vec4 vertexColor;
 
                 void main()
                 {
 
                     gl_Position = ViewProjection * Model * vec4(modelPos, 1.0f);
-                    colorData = colorDataIn;
+                    vertexColor = vec4(colorDataIn, 1.0f);
 
                 }
                 )glsl";
@@ -51,12 +51,13 @@ Shader_Compilation::Shader_Compilation()
     const char* fragmentshaderGLSL = R"glsl(
                 #version 450 core
 
-                in vec3 colorsData;
-                out vec4 color;
+                in vec4 vertexColor;
+                out vec4 FragColor;
+
 
                 void main()
                 {
-	                color = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	                FragColor = vertexColor;
                 }
         )glsl";
         
@@ -98,7 +99,7 @@ Shader_Compilation::Shader_Compilation()
 
         // Exit with failure.
         glDeleteShader(vertexShader); // Don't leak the shader.
-        exit(1);
+        exit(2);
     }
 
 
