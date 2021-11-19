@@ -53,15 +53,16 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
     window = window_in;
     shaderProgram = shaderProgram_in;
 
-    ObjReader cube("./Assets/cube.obj");
-    ObjReader sphere_2("./Assets/sphere.obj");
-    ObjReader cube_3("./Assets/cube.obj");
+    //ObjReader cube("./Assets/cube.obj");
+    //ObjReader sphere_2("./Assets/sphere.obj");
+    //ObjReader cube_3("./Assets/cube.obj");
 
     // initialisation des Events Claviers
     Input_Event inputs(window);
 
     // initialisation de la map
-    MapParser map((char*)"./Assets/map/heightmap.map_triangulated");
+    MapParser map((char*)"./Assets/map/heightmap_verticecs.data_map");
+    map.prepare_to_draw(shaderProgram);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -89,7 +90,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
 
          /*  transformations matrices */
 
-        Projection = glm::perspective(glm::radians(45.0f), (640.0f / 480.0f), 0.1f, 100.0f);
+        Projection = glm::perspective(glm::radians(45.0f), (1024.0f / 768.0f), 0.1f, 100.0f);
 
         // Camera
         // 

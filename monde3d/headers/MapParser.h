@@ -11,7 +11,7 @@
 
 struct map_data {
 	std::vector<float> map_vertices;
-	std::vector<float> map_vertices;
+	std::vector<unsigned int> map_indices;
 	std::vector<float> map_colors;
 };
 
@@ -22,11 +22,12 @@ public:
 	MapParser(char * filename);
 	~MapParser();
 	void draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in);
+	void prepare_to_draw(unsigned int shaderProgram);
 
 
 private:
 	map_data my_map_data;
-	unsigned int vbo, color_buffer, vao;
+	unsigned int vbo, color_buffer, vao, indices_buffer;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;
 };
@@ -36,6 +37,7 @@ MapParser::MapParser(char * filename)
 	// gen vbo and vao
 	glGenBuffers(1, &vbo);
 	glGenBuffers(1, &color_buffer);
+	glGenBuffers(1, &indices_buffer);
 	glGenVertexArrays(1, &vao);
 
 	ViewProjection = glm::mat4(0.0f);
@@ -55,18 +57,23 @@ MapParser::MapParser(char * filename)
 	float x = 0.0f,
 		y = 0.0f,
 		z = 0.0f;
+	int i = 0;
 
 	while (!feof(file))
 	{
-		fscanf_s(file, "%f %f %f C %f\n", &x, &y, &z, &data);
+		fscanf_s(file, "P %f %f %f C %f I %i\n", &x, &y, &z, &data, &i);
+
+
+		// push indice
+		my_map_data.map_indices.push_back((unsigned int)i);
 
 		// x from plan = x from world
 		// y from plan = z from world
 		// data from plan = y from world
 		// generates planes
-		my_map_data.map_vertices.push_back(x * 0.01);
-		my_map_data.map_vertices.push_back(y * 0.01);
-		my_map_data.map_vertices.push_back(z * 0.01);
+		my_map_data.map_vertices.push_back(x);
+		my_map_data.map_vertices.push_back(y);
+		my_map_data.map_vertices.push_back(z);
 
 
 		for (int i = 0; i < 3; i++)
@@ -114,10 +121,8 @@ MapParser::MapParser(char * filename)
 
 }
 
-
-void MapParser::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
+void MapParser::prepare_to_draw(unsigned int shaderProgram)
 {
-	ViewProjection = ViewProjection_in;
 
 	glUseProgram(shaderProgram);
 
@@ -125,7 +130,7 @@ void MapParser::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 	glBindVertexArray(vao);
 
 
-	
+
 
 
 	/*
@@ -136,14 +141,15 @@ void MapParser::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	// bind des vertices
 	glBufferData(GL_ARRAY_BUFFER, my_map_data.map_vertices.size() * sizeof(float), my_map_data.map_vertices.data(), GL_STATIC_DRAW);
-	
+
 	// coordonnées
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	/* ****************************************** */
 
-	// bind the VBO
+	// bind the couelur
+	/*
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
 	glBindVertexArray(color_buffer);
 	// bind des couleurs
@@ -153,10 +159,28 @@ void MapParser::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 	// couleurs
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);
-
+	*/
 	/* *********************** */
 
-	// TODO bind indices
+	// bind indices
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, my_map_data.map_indices.size() * sizeof(unsigned int), my_map_data.map_indices.data(), GL_STATIC_DRAW);
+
+
+
+}
+
+void MapParser::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
+{
+
+
+	ViewProjection = ViewProjection_in;
+
+	glUseProgram(shaderProgram);
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo); // vertices
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer); // indices
+
 
 
 	/* transformation */
@@ -174,7 +198,7 @@ void MapParser::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 
 	//draw
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)my_map_data.map_vertices.size() / 3);
-
+	//glDrawElements(GL_TRIANGLES, my_map_data.map_indices.size(), GL_UNSIGNED_INT, (void*)0);
 
 }
 
