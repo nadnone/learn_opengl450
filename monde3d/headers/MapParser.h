@@ -22,8 +22,8 @@ class MapParser
 public:
 	MapParser(char * filename);
 	~MapParser();
-	void draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in);
-	void prepare_to_draw(unsigned int shaderProgram);
+void draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in);
+void prepare_to_draw(unsigned int shaderProgram);
 
 
 private:
@@ -31,14 +31,15 @@ private:
 	unsigned int vbo, color_buffer, vao, indices_buffer;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;
+	const float coeff = 0.1f;
 };
 
-MapParser::MapParser(char * filename)
+MapParser::MapParser(char* filename)
 {
 	// gen vbo and vao
 	glGenBuffers(1, &vbo);
 	glGenBuffers(1, &color_buffer);
-	glGenBuffers(1, &indices_buffer);
+	//glGenBuffers(1, &indices_buffer);
 	glGenVertexArrays(1, &vao);
 
 	ViewProjection = glm::mat4(0.0f);
@@ -48,7 +49,7 @@ MapParser::MapParser(char * filename)
 
 
 	// decode heightmap
-	std::vector<unsigned char> image; 
+	std::vector<unsigned char> image;
 	unsigned width, height;
 
 	unsigned error = lodepng::decode(image, width, height, filename);
@@ -58,112 +59,129 @@ MapParser::MapParser(char * filename)
 		exit(1);
 	}
 
+	std::vector<float> z;
 
-	for (unsigned w = 0; w < width; w++)
+	for (unsigned i = 0; i < image.size(); i++)
 	{
-		for (unsigned h = 0; h < height; h++)
+		z.push_back((image[i] / 255.0f) * 4.0f);
+	}
+
+
+	for (int h = 0; h <= height - 2; h++)
+	{
+		for (int w = 0; w <= width - 2; w++)
 		{
 
-			// gestion des couleurs
-
-			float data = image[(w*4) * h];
-
-			if (data < 42.5f)
-			{
-				my_map_data.map_colors.push_back(36.0f / 255); // couleur de l'eau
-				my_map_data.map_colors.push_back(128.0f / 255); // couleur de l'eau
-				my_map_data.map_colors.push_back(214.0f / 255); // couleur de l'eau
-			}
-			else if (data < 84.0f)
-			{
-				my_map_data.map_colors.push_back(209.0f / 255); // couleur du sable
-				my_map_data.map_colors.push_back(206.0f / 255); // couleur du sable
-				my_map_data.map_colors.push_back(115.0f / 255); // couleur du sable
-			}
-			else if (data < 127.5f)
-			{
-				my_map_data.map_colors.push_back(10.0f / 255); // couleur de l'herbe
-				my_map_data.map_colors.push_back(125.0f / 255); // couleur de l'herbe
-				my_map_data.map_colors.push_back(18.0f / 255); // couleur de l'herbe
-			}
-			else if (data < 170.0f)
-			{
-				my_map_data.map_colors.push_back(1180.f / 255); // couleur de la pierre
-				my_map_data.map_colors.push_back(1200.f / 255); // couleur de la pierre
-				my_map_data.map_colors.push_back(1170.f / 255); // couleur de la pierre
-			}
-			else if (data < 200.0f)
-			{
-				my_map_data.map_colors.push_back(194.0f / 255); // couleur de la neige
-				my_map_data.map_colors.push_back(194.0f / 255); // couleur de la neige
-				my_map_data.map_colors.push_back(192.0f / 255); // couleur de la neige
-			}
 
 
-			data /= 255.0f;
 
 			// gestions des vertices
-			glm::vec2 center_O = glm::vec2(w / 2.0f, h / 2.0f);
 
-			// positions des points des triangles
-			float position_carre[9][3] = {
+			int x_pixel = w, y_pixel = h; // int car indice de pixel dans la map
+			const int RGBA_nb = 4;
+			float y_pos = h, x_pos = w; // positions flotante pour une utilisation en tant que coordonnée
 
-				{center_O.x / 2.0f, 0.0f, center_O.y * 2.0f}, // 1
+			// on multiplie les positions par un coefficien pour dominuer leur taille
+			x_pos *= coeff;
+			y_pos *= coeff;
 
-				{center_O.x, 0.0f, center_O.y * 2.0f},		// 2
-
-				{center_O.x * 2.0f, 0.0f, center_O.y * 2.0f}, // 3
-
-				{center_O.x * 2.0f, 0.0f, center_O.y},		// 4
-
-				{center_O.x * 2.0f, 0.0f, center_O.y / 2.0f}, // 5
-
-				{center_O.x, 0.0f, center_O.y / 2.0f},		// 6
-
-				{center_O.x / 2.0f, 0.0f, center_O.y / 2.0f}, // 7
-
-				{center_O.x / 2.0f, 0.0f, center_O.y},		// 8
-
-				{center_O.x, data, center_O.y},			// 9
+			// positions des points des deux triangles (par rapport à mon croquis)
+			float position_carre[4][3] = {
+				// 0 = 1
+				{
+					x_pos,
+					z[ (x_pixel * RGBA_nb) + (y_pixel * width * RGBA_nb)],
+					y_pos
+				},					
+				// 1 = 2
+				{ 
+					x_pos + coeff,
+					z[( (1 + x_pixel) * RGBA_nb) + (y_pixel * width * RGBA_nb)],
+					y_pos
+				},
+				// 2 = 4
+				{ 
+					x_pos, 
+					z[( x_pixel * RGBA_nb) + ((1 + y_pixel) * width * RGBA_nb)],
+					coeff + y_pos
+				},
+				// 3 = 5
+				{ 
+					coeff + x_pos,
+					z[( (1 + x_pixel) * RGBA_nb) + ((1 + y_pixel) * width * RGBA_nb)],
+					coeff + y_pos
+				}	
 			};
 
+			int positions_colors[4] = {
+									// 0
+									(x_pixel * RGBA_nb) + (y_pixel * width * RGBA_nb),
+									// 1
+									((1 + x_pixel) * RGBA_nb) + (y_pixel * width * RGBA_nb),
+									// 2
+									(x_pixel * RGBA_nb) + ((1 + y_pixel) * width * RGBA_nb),
+									// 3
+									((1 + x_pixel) * RGBA_nb) + ((1 + y_pixel) * width * RGBA_nb)
+			};
 
+			// ordre des positions pour former les deux triangles
+			unsigned order[6] = {
+								0, 2, 1,
+								2, 1, 3
+			};
 
-			for (unsigned nb = 0; nb < 8; nb++)
+			// draw square
+			for (unsigned nb = 0; nb < 6; nb++) // nombre d'ordre ( quel positions va dans quel ordre )
 			{
-				// triangle pt 1
-				my_map_data.map_vertices.push_back(position_carre[nb][0]); // x
-				my_map_data.map_vertices.push_back(position_carre[nb][1]); // y
-				my_map_data.map_vertices.push_back(position_carre[nb][2]); // z
 
-				// triangle pt 2 
-				my_map_data.map_vertices.push_back(position_carre[8][0]); // x
-				my_map_data.map_vertices.push_back(position_carre[8][1]); // y
-				my_map_data.map_vertices.push_back(position_carre[8][2]); // z
+				for (unsigned pt = 0; pt < 3; pt++) // pour chaque axe (x, y, z)
+				{
+					// triangles par rapport à l'ordre de position définis
+					my_map_data.map_vertices.push_back(position_carre[ order[nb] ][pt]); // xyz
+							
+				}
 
-				// triangle pt 3
-				my_map_data.map_vertices.push_back(position_carre[nb + 1][0]); // x
-				my_map_data.map_vertices.push_back(position_carre[nb + 1][1]); // y
-				my_map_data.map_vertices.push_back(position_carre[nb + 1][2]); // z
+				// gestion des couleurs
+				float data = image[positions_colors[order[nb]]];
+
+
+				if (data < 42.5f)
+				{
+					my_map_data.map_colors.push_back(36.0f / 255); // couleur de l'eau
+					my_map_data.map_colors.push_back(128.0f / 255); // couleur de l'eau
+					my_map_data.map_colors.push_back(214.0f / 255); // couleur de l'eau
+				}
+				else if (data < 84.0f)
+				{
+					my_map_data.map_colors.push_back(209.0f / 255); // couleur du sable
+					my_map_data.map_colors.push_back(206.0f / 255); // couleur du sable
+					my_map_data.map_colors.push_back(115.0f / 255); // couleur du sable
+				}
+				else if (data < 127.5f)
+				{
+					my_map_data.map_colors.push_back(10.0f / 255); // couleur de l'herbe
+					my_map_data.map_colors.push_back(125.0f / 255); // couleur de l'herbe
+					my_map_data.map_colors.push_back(18.0f / 255); // couleur de l'herbe
+				}
+				else if (data < 170.0f)
+				{
+					my_map_data.map_colors.push_back(1180.f / 255); // couleur de la pierre
+					my_map_data.map_colors.push_back(1200.f / 255); // couleur de la pierre
+					my_map_data.map_colors.push_back(1170.f / 255); // couleur de la pierre
+				}
+				else if (data < 255.0f)
+				{
+					my_map_data.map_colors.push_back(194.0f / 255); // couleur de la neige
+					my_map_data.map_colors.push_back(194.0f / 255); // couleur de la neige
+					my_map_data.map_colors.push_back(192.0f / 255); // couleur de la neige
+				}
 			}
-
-
-
-
 		}
 
 	}
 
-		// TODO revoir les couleurs
-		// TODO revoir les coordonées de la map
-		// TODO revoir le generateur de map
-	
-		//printf("x=%i %f\n", x, data);
-
-	}
 }
-
-void MapParser::prepare_to_draw(unsigned int shaderProgram)
+void MapParser::prepare_to_draw(unsigned int shaderProgram) 
 {
 
 	glUseProgram(shaderProgram);
@@ -205,8 +223,8 @@ void MapParser::prepare_to_draw(unsigned int shaderProgram)
 	/* *********************** */
 
 	// bind indices
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, my_map_data.map_indices.size() * sizeof(unsigned int), my_map_data.map_indices.data(), GL_STATIC_DRAW);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, my_map_data.map_indices.size() * sizeof(unsigned int), my_map_data.map_indices.data(), GL_STATIC_DRAW);
 
 
 
@@ -221,7 +239,7 @@ void MapParser::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 	glUseProgram(shaderProgram);
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); // vertices
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer); // indices
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer); // indices
 
 
 
