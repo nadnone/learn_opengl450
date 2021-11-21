@@ -7,6 +7,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Misc.h"
+
 class ObjReader
 {
 public:
@@ -15,15 +17,14 @@ public:
 
 	glm::mat4 translate(glm::vec3 translation_direction, glm::mat4 Model_in);
 	glm::mat4 rotate(float angle, glm::mat4 Model_in, glm::vec3 axe);
-
-	std::vector<float> getVertices();
 	void draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in);
+	void prepare_to_draw(unsigned int shaderProgram);
 
 private:
 	std::vector<glm::vec3> data_vertices_coord;
 	std::vector<std::vector<std::vector<int>>> faces_data;
-	std::vector<float> vertices_vector_total;
-	unsigned int vbo, vao;
+	Misc::obj_data my_map_data;
+	unsigned int vbo, color_buffer, vao, indices_buffer;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;
 };
@@ -38,7 +39,10 @@ ObjReader::ObjReader(const char * filename)
 	ViewProjection = glm::mat4(0.0f);
 	Model = glm::mat4(1.0f);
 
+	// gen vbo and vao
 	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &color_buffer);
+	//glGenBuffers(1, &indices_buffer);
 	glGenVertexArrays(1, &vao);
 
 	std::fstream ObjFile(filename);
@@ -103,29 +107,27 @@ ObjReader::ObjReader(const char * filename)
 		for (int j = 0; j < faces_data[i].size(); j++)
 		{
 
-			vertices_vector_total.push_back(data_vertices_coord[(faces_data[i][j][0] - (int)1)].x);
-			vertices_vector_total.push_back(data_vertices_coord[(faces_data[i][j][0] - (int)1)].y);
-			vertices_vector_total.push_back(data_vertices_coord[(faces_data[i][j][0] - (int)1)].z);
+			my_map_data.map_vertices.push_back(data_vertices_coord[(faces_data[i][j][0] - (int)1)].x);
+			my_map_data.map_vertices.push_back(data_vertices_coord[(faces_data[i][j][0] - (int)1)].y);
+			my_map_data.map_vertices.push_back(data_vertices_coord[(faces_data[i][j][0] - (int)1)].z);
+
+
+			// TODO remplacer par couleur de l'objet
+			my_map_data.map_colors.push_back(0.0f);
+			my_map_data.map_colors.push_back(0.0f);
+			my_map_data.map_colors.push_back(255.0f);
+
+
 
 		}
 	}
-}
 
-std::vector<float> ObjReader::getVertices()
-{
-
-	return vertices_vector_total;
 }
 
 
 
-
-
-
-
-void ObjReader::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
+void ObjReader::prepare_to_draw(unsigned int shaderProgram)
 {
-	ViewProjection = ViewProjection_in;
 
 	glUseProgram(shaderProgram);
 
@@ -133,27 +135,59 @@ void ObjReader::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 	glBindVertexArray(vao);
 
 
-	// bind the VBO
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices_vector_total.size() * sizeof(float), vertices_vector_total.data(), GL_STATIC_DRAW);
+
 
 
 	/*
 		Shader Program
 	*/
 
+	// bind the VBO 
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	// bind des vertices
+	glBufferData(GL_ARRAY_BUFFER, my_map_data.map_vertices.size() * sizeof(float), my_map_data.map_vertices.data(), GL_STATIC_DRAW);
 
+	// coordonnées
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
+	/* ****************************************** */
+
+	// bind the couelur
+
+	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
+	glBindVertexArray(color_buffer);
+	// bind des couleurs
+	glBufferData(GL_ARRAY_BUFFER, my_map_data.map_colors.size() * sizeof(float), my_map_data.map_colors.data(), GL_STATIC_DRAW);
+
+
+	// couleurs
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(1);
+
 	/* *********************** */
 
+	// bind indices
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, my_map_data.map_indices.size() * sizeof(unsigned int), my_map_data.map_indices.data(), GL_STATIC_DRAW);
+
+
+
+}
+
+void ObjReader::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
+{
+
+	ViewProjection = ViewProjection_in;
+
+	glUseProgram(shaderProgram);
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo); // vertices
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer); // indices
 
 
 
 	/* transformation */
-
-
 
 	GLuint MatrixID = glGetUniformLocation(shaderProgram, "Model");
 
@@ -167,7 +201,8 @@ void ObjReader::draw(unsigned int shaderProgram, glm::mat4 ViewProjection_in)
 
 
 	//draw
-	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices_vector_total.size() / 3);
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)my_map_data.map_vertices.size() / 3);
+	//glDrawElements(GL_TRIANGLES, my_map_data.map_indices.size(), GL_UNSIGNED_INT, (void*)0);
 
 }
 

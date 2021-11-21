@@ -10,8 +10,8 @@
 
 
 struct mouse_keyboard {
-	glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 direction = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 position = glm::vec3(0.0f);
+	glm::vec3 direction = glm::vec3(0.0f);
 	glm::vec2 angle = glm::vec2(0.0f);	
 	glm::vec3 camFront = glm::vec3(0.0f);
 };
@@ -53,8 +53,8 @@ mouse_keyboard Input_Event::getMovement()
 	double x = 0.0f, y = 0.0f;
 	glfwGetCursorPos(window, &x, &y);
 
-	input_return.angle.x += x * SENSIVITY;
-	input_return.angle.y += y * SENSIVITY;
+	input_return.angle.x += (float)x * SENSIVITY;
+	input_return.angle.y += (float)y * SENSIVITY;
 
 
 	// max angle

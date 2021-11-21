@@ -9,9 +9,14 @@
 #include <thread>
 #include <chrono>
 
-#include "ObjReader.h"
+
 #include "Input_event.h"
+
 #include "MapParser.h"
+
+#include "ObjReader.h"
+#include "ObjImporter.h"
+
 
 class GameLoop
 {
@@ -34,9 +39,9 @@ private:
 
     mouse_keyboard camera_Pos_Angle;
 
-    const float MIN_FPX = 1.0f / 60.0f;
+    const float MIN_FPS = 1.0f / 60.0f;
 
-    GLFWwindow* window;
+    GLFWwindow* window = NULL;
 
 };
 
@@ -53,7 +58,10 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
     window = window_in;
     shaderProgram = shaderProgram_in;
 
-    //ObjReader cube("./Assets/cube.obj");
+    ObjImporter importerAssimpTest("./Assets/cookie_modified.dae", 1.0f);
+    //ObjReader cube("./Assets/cube.obj");   
+    importerAssimpTest.prepare_to_draw(shaderProgram);
+
     //ObjReader sphere_2("./Assets/sphere.obj");
     //ObjReader cube_3("./Assets/cube.obj");
 
@@ -77,7 +85,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
         // Limit movement time
         double time = glfwGetTime();
 
-        if ((time - lastmovementTime) >= MIN_FPX)
+        if ((time - lastmovementTime) >= MIN_FPS)
         {
             // INPUT EVENTS
             camera_Pos_Angle = inputs.getMovement();
@@ -99,18 +107,19 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
         /* ********************* */
 
 
-        map.draw(shaderProgram, Projection * View);
+        map.draw(Projection * View);
 
-        /*
-        glm::mat4 Model = cube.translate(glm::vec3(translationLoop, 0.0f, 5.0f), glm::mat4(1.0f));
-        Model = cube.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(1, 0, 0));
-        cube.draw(shaderProgram, Projection * View);
+        
+        //glm::mat4 Model = cube.translate(glm::vec3(translationLoop, 0.0f, 5.0f), glm::mat4(1.0f));
+        //Model = cube.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(1, 0, 0));
+   
+        importerAssimpTest.draw(Projection * View);
 
         //Model = sphere_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
         //Model = sphere_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));
-        sphere_2.draw(shaderProgram, Projection * View);
+        //sphere_2.draw(shaderProgram, Projection * View);
 
-        */
+
         //glm::mat4 Model = cube_3.rotate(deltaTickLoop / 3.1415f / 10.0f, glm::mat4(1.0f), glm::vec3(1, 1, 1));
         //cube_3.draw(shaderProgram, Projection * View);
 

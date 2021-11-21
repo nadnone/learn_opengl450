@@ -32,6 +32,7 @@
     <ClInclude Include="headers\Input_event.h" />
     <ClInclude Include="headers\MapParser.h" />
     <ClInclude Include="headers\Misc.h" />
+    <ClInclude Include="headers\ObjImporter.h" />
     <ClInclude Include="headers\ObjReader.h" />
     <ClInclude Include="headers\Shader.h" />
   </ItemGroup>
@@ -145,7 +146,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

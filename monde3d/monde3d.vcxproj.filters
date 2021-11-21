@@ -46,5 +46,8 @@
     <ClInclude Include="headers\MapParser.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="headers\ObjImporter.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
