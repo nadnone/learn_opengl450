@@ -40,7 +40,7 @@ int main(void)
     gladLoadGL();
 
     // depth testing
-    glEnable(GL_DEPTH);
+    glEnable(GL_DEPTH_TEST);
 
     
 

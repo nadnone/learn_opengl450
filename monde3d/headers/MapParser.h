@@ -147,13 +147,13 @@ MapParser::MapParser(char* filename)
 				float data = image[positions_colors[order[nb]]];
 
 
-				if (data < 42.5f)
+				if (data < 5.0f)
 				{
 					my_obj_data.map_colors.push_back(36.0f / 255); // couleur de l'eau
 					my_obj_data.map_colors.push_back(128.0f / 255); // couleur de l'eau
 					my_obj_data.map_colors.push_back(214.0f / 255); // couleur de l'eau
 				}
-				else if (data < 84.0f)
+				else if (data < 50.0f)
 				{
 					my_obj_data.map_colors.push_back(209.0f / 255); // couleur du sable
 					my_obj_data.map_colors.push_back(206.0f / 255); // couleur du sable
