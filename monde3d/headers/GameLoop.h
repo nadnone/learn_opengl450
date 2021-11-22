@@ -58,9 +58,9 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
     window = window_in;
     shaderProgram = shaderProgram_in;
 
-    //ObjImporter importerAssimpTest("./Assets/cookie_modified.dae", 1.0f);
+    ObjImporter importerAssimpTest("./Assets/cookie.dae", 1.0f);
     //ObjReader cube("./Assets/cube.obj");   
-    //importerAssimpTest.prepare_to_draw(shaderProgram);
+    importerAssimpTest.prepare_to_draw(shaderProgram);
 
     //ObjReader sphere_2("./Assets/sphere.obj");
     //ObjReader cube_3("./Assets/cube.obj");
@@ -71,6 +71,8 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
     // initialisation de la map
     MapParser map((char*)"./Assets/map/grayscale_heightmap.png");
     map.prepare_to_draw(shaderProgram);
+
+    float ambiance = 0.1f;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -113,7 +115,8 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
         //glm::mat4 Model = cube.translate(glm::vec3(translationLoop, 0.0f, 5.0f), glm::mat4(1.0f));
         //Model = cube.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(1, 0, 0));
    
-        //importerAssimpTest.draw(Projection * View);
+        importerAssimpTest.draw(Projection * View, ambiance+=0.005f);
+        if (ambiance > 1.0f) ambiance = 0.0f;
 
         //Model = sphere_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
         //Model = sphere_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));

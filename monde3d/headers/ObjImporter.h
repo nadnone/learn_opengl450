@@ -11,7 +11,7 @@ class ObjImporter
 public:
 	ObjImporter(const char * filename, float scale);
 	~ObjImporter();
-	void draw(glm::mat4 ViewProjection_in);
+	void draw(glm::mat4 ViewProjection_in, float ambiance_in);
 	void prepare_to_draw(unsigned int shaderProgram);
 
 private:
@@ -19,15 +19,18 @@ private:
 
 	unsigned int vbo = 0,
 		color_buffer = 0,
+		normals_buffer = 0,
 		vao = 0,
 		shaderProgram = 0;
 	glm::mat4 Model = glm::mat4(1.0f);
 	glm::mat4 ViewProjection = glm::mat4(0.0f);
+	glm::vec3 LightColor = glm::vec3(1.0f);
 
 	Misc::obj_data mesh_data;
 	float coeff = 1.0f;
 
 	void processMesh(aiMesh* mesh, const aiScene* scene);
+	void processNode(aiNode* child, const aiScene* scene);
 
 };
 
@@ -49,6 +52,12 @@ void ObjImporter::processMesh(aiMesh *mesh, const aiScene* scene)
 		mesh_data.map_colors.push_back(166.0f / 255);
 		mesh_data.map_colors.push_back(127.0f / 255);
 		mesh_data.map_colors.push_back(10.0f / 255);
+
+		mesh_data.normals.push_back(mesh->mNormals[i].x);
+		mesh_data.normals.push_back(mesh->mNormals[i].y);
+		mesh_data.normals.push_back(mesh->mNormals[i].z);
+
+
 		// TODO mettre la texture de l'objet
 
 
@@ -86,7 +95,28 @@ void ObjImporter::processMesh(aiMesh *mesh, const aiScene* scene)
 
 
 }
+void ObjImporter::processNode(aiNode* node, const aiScene* scene)
+{
+	for (unsigned i = 0; i < node->mNumChildren; i++)
+	{
+		aiNode* child = node->mChildren[i];
+		
 
+		for (unsigned j = 0; j < child->mNumMeshes; j++)
+		{
+			aiMesh* mesh = scene->mMeshes[child->mMeshes[j]]; // TODO à revoir
+
+			processMesh(mesh, scene);
+
+		}
+		if (child->mNumChildren > 0)
+		{
+			processNode(child, scene);
+		}
+
+	}
+
+}
 
 
 ObjImporter::ObjImporter(const char * filename, float scale)
@@ -97,6 +127,7 @@ ObjImporter::ObjImporter(const char * filename, float scale)
 	// gen vbo and vao
 	glGenBuffers(1, &vbo);
 	glGenBuffers(1, &color_buffer);
+	glGenBuffers(1, &normals_buffer);
 	//glGenBuffers(1, &indices_buffer);
 	glGenVertexArrays(1, &vao);
 
@@ -114,13 +145,19 @@ ObjImporter::ObjImporter(const char * filename, float scale)
 		exit(1);
 	}
 
-
-
+	
 	aiNode* node = scene->mRootNode;
-	aiMesh* mesh = scene->mMeshes[node->mMeshes[0]]; // TODO à revoir
 
-	processMesh(mesh, scene);
+	if (!node)
+	{
+		exit(1);
+	}
 
+	//printf("%i\n", node->mNumChildren);
+
+	processNode(node, scene);
+	
+	
 
 
 }
@@ -160,18 +197,29 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 	/* ****************************************** */
 
 	// bind the couelur
-
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
 	glBindVertexArray(color_buffer);
-	// bind des couleurs
 	glBufferData(GL_ARRAY_BUFFER, mesh_data.map_colors.size() * sizeof(float), mesh_data.map_colors.data(), GL_STATIC_DRAW);
 
-
-	// couleurs
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);
 
 	/* *********************** */
+
+
+
+	// bind the normals
+	glBindBuffer(GL_ARRAY_BUFFER, normals_buffer);
+	glBindVertexArray(normals_buffer);
+	glBufferData(GL_ARRAY_BUFFER, mesh_data.normals.size() * sizeof(float), mesh_data.normals.data(), GL_STATIC_DRAW);
+
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(2);
+
+	/* *********************** */
+
+
+
 
 	// bind indices
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
@@ -185,11 +233,13 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 
 }
 
-void ObjImporter::draw(glm::mat4 ViewProjection_in)
+void ObjImporter::draw(glm::mat4 ViewProjection_in, float ambiance_in)
 {
 
 
 	ViewProjection = ViewProjection_in;
+	float ambiance = ambiance_in;
+
 
 	glUseProgram(shaderProgram);
 	glBindVertexArray(vao);
@@ -209,6 +259,23 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in)
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ViewProjection));
 
 	/* *********************  */
+
+
+	/* LUMIERE */
+
+	// couleur de lumière
+	MatrixID = glGetUniformLocation(shaderProgram, "lightColor");
+	glUniform3f(MatrixID, LightColor.x, LightColor.y, LightColor.z);
+
+	// ambiance
+	MatrixID = glGetUniformLocation(shaderProgram, "ambientStrenght");
+	glUniform1f(MatrixID, ambiance);
+
+	// positions lumière
+	//MatrixID = glGetUniformLocation(shaderProgram, "lightPos");
+	//glUniform1f(MatrixID, ambiance);
+
+	/* ******************** */
 
 
 	//draw

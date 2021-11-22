@@ -29,18 +29,19 @@ Shader_Compilation::Shader_Compilation()
 
                 layout(location = 0) in vec3 modelPos;
                 layout(location = 1) in vec3 colorDataIn;
+                layout(location = 2) in vec4 normalsDataIn;
 
                 uniform mat4 Model;
                 uniform mat4 ViewProjection;
 
-                out vec4 vertexColor;
+                out vec3 vertexColor;
+                out vec4 vertexNormals;
 
                 void main()
                 {
-
                     gl_Position = ViewProjection * Model * vec4(modelPos, 1.0f);
-                    vertexColor = vec4(colorDataIn, 1.0f);
-
+                    vertexColor = colorDataIn;
+                    vertexNormals = normalsDataIn;
                 }
                 )glsl";
     unsigned int vertexShader;
@@ -51,17 +52,24 @@ Shader_Compilation::Shader_Compilation()
     const char* fragmentshaderGLSL = R"glsl(
                 #version 450 core
 
-                in vec4 vertexColor;
+                in vec3 vertexColor;
+                in vec4 vertexNormals;
+
                 out vec4 FragColor;
 
+                uniform vec3 lightColor;
+                uniform vec3 lightPos;
+
+                uniform float ambientStrenght;
 
                 void main()
                 {
-	                FragColor = vertexColor;
+	                FragColor = vec4(ambientStrenght * lightColor * vertexColor, 1.0f);
                 }
         )glsl";
         
-    // TODO Afficher les couleurs à l'écran
+    // TODO Comprendre les materials
+    // TODO calculer la lumière à partir d'un soleil virtuel
 
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -84,6 +92,7 @@ Shader_Compilation::Shader_Compilation()
 
         // Exit with failure.
         glDeleteShader(fragmentShader); // Don't leak the shader.
+        printf("FragmentShader Error\n");
         exit(2);
     }
 
@@ -99,6 +108,7 @@ Shader_Compilation::Shader_Compilation()
 
         // Exit with failure.
         glDeleteShader(vertexShader); // Don't leak the shader.
+        printf("VertexShader Error\n");
         exit(2);
     }
 

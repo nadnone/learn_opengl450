@@ -22,8 +22,12 @@ public:
         std::vector<float> textures;
         std::vector<float> normals;
     };
-
-    //std::vector<std::vector<obj_data>> Mesh;
+    /*
+    struct Material_data {
+        
+    };
+    */
+    // TODO learn Materials
 
 private:
 
