@@ -11,8 +11,10 @@ class ObjImporter
 public:
 	ObjImporter(const char * filename, float scale);
 	~ObjImporter();
-	void draw(glm::mat4 ViewProjection_in, float ambiance_in);
+	void draw(glm::mat4 ViewProjection_in, float ambiance_in, glm::vec3 lightPos, glm::mat4 Model_in);
 	void prepare_to_draw(unsigned int shaderProgram);
+	glm::mat4 translate(glm::vec3 translation_direction, glm::mat4 Model_in);
+	glm::mat4 rotate(float angle, glm::mat4 Model_in, glm::vec3 axe);
 
 private:
 	Misc::obj_data my_obj_data;
@@ -47,18 +49,10 @@ void ObjImporter::processMesh(aiMesh *mesh, const aiScene* scene)
 		mesh_data.map_vertices.push_back(mesh->mVertices[i].z * coeff);
 		mesh_data.map_vertices.push_back(mesh->mVertices[i].y * coeff);
 
-
 		// couleur 
 		mesh_data.map_colors.push_back(166.0f / 255);
 		mesh_data.map_colors.push_back(127.0f / 255);
 		mesh_data.map_colors.push_back(10.0f / 255);
-
-		mesh_data.normals.push_back(mesh->mNormals[i].x);
-		mesh_data.normals.push_back(mesh->mNormals[i].y);
-		mesh_data.normals.push_back(mesh->mNormals[i].z);
-
-
-		// TODO mettre la texture de l'objet
 
 
 		// normals
@@ -233,10 +227,10 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 
 }
 
-void ObjImporter::draw(glm::mat4 ViewProjection_in, float ambiance_in)
+void ObjImporter::draw(glm::mat4 ViewProjection_in, float ambiance_in, glm::vec3 lightPos, glm::mat4 Model_in)
 {
 
-
+	Model = Model_in;
 	ViewProjection = ViewProjection_in;
 	float ambiance = ambiance_in;
 
@@ -272,8 +266,8 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, float ambiance_in)
 	glUniform1f(MatrixID, ambiance);
 
 	// positions lumière
-	//MatrixID = glGetUniformLocation(shaderProgram, "lightPos");
-	//glUniform1f(MatrixID, ambiance);
+	MatrixID = glGetUniformLocation(shaderProgram, "lightPos");
+	glUniform3f(MatrixID, lightPos.x, lightPos.y, lightPos.z);
 
 	/* ******************** */
 
@@ -281,5 +275,18 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, float ambiance_in)
 	//draw
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_data.map_vertices.size() / 3);
 	//glDrawElements(GL_TRIANGLES, my_map_data.map_indices.size(), GL_UNSIGNED_INT, (void*)0);
+
+}
+glm::mat4 ObjImporter::translate(glm::vec3 translation_direction, glm::mat4 Model_in)
+{
+	Model = glm::translate(Model_in, translation_direction);
+	return Model;
+
+}
+
+glm::mat4 ObjImporter::rotate(float angle, glm::mat4 Model_in, glm::vec3 axe)
+{
+	Model = glm::rotate(Model_in, angle, axe);
+	return Model;
 
 }

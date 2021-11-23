@@ -17,7 +17,7 @@ class MapParser
 public:
 	MapParser(char * filename);
 	~MapParser();
-	void draw(glm::mat4 ViewProjection_in);
+	void draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 lightColor, float ambiance);
 	void prepare_to_draw(unsigned int shaderProgram_in);
 
 
@@ -26,7 +26,8 @@ private:
 	unsigned int vbo = 0,
 		color_buffer = 0,
 		vao = 0,
-		shaderProgram = 0;
+		shaderProgram = 0,
+		normals_buffer = 0;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;
 	const float COEFF = 0.1f;
@@ -37,6 +38,7 @@ MapParser::MapParser(char* filename)
 	// gen vbo and vao
 	glGenBuffers(1, &vbo);
 	glGenBuffers(1, &color_buffer);
+	glGenBuffers(1, &normals_buffer);
 	//glGenBuffers(1, &indices_buffer);
 	glGenVertexArrays(1, &vao);
 
@@ -140,14 +142,15 @@ MapParser::MapParser(char* filename)
 				{
 					// triangles par rapport à l'ordre de position définis
 					my_obj_data.map_vertices.push_back(position_carre[ order[nb] ][pt]); // xyz
-							
 				}
+
+
 
 				// gestion des couleurs
 				float data = image[positions_colors[order[nb]]];
 
 
-				if (data < 5.0f)
+				if (data < 0.07f)
 				{
 					my_obj_data.map_colors.push_back(36.0f / 255); // couleur de l'eau
 					my_obj_data.map_colors.push_back(128.0f / 255); // couleur de l'eau
@@ -178,6 +181,32 @@ MapParser::MapParser(char* filename)
 					my_obj_data.map_colors.push_back(192.0f / 255); // couleur de la neige
 				}
 			}
+
+
+			for (unsigned nb = 0; nb < 6; nb += 3)
+			{
+
+				// gestion des normals
+				glm::vec3 normal = glm::cross(
+					glm::vec3(position_carre[order[nb]][0], position_carre[order[nb]][1], position_carre[order[nb]][2]),
+					glm::vec3(position_carre[order[nb + 1]][0], position_carre[order[nb + 1]][1], position_carre[order[nb + 1]][2])
+				);
+				// gestion des normals
+				normal = glm::cross(
+					normal,
+					glm::vec3(position_carre[order[nb + 2]][0], position_carre[order[nb + 2]][1], position_carre[order[nb + 2]][2])
+				);
+				
+
+				my_obj_data.normals.push_back(normal.x);
+				my_obj_data.normals.push_back(normal.y);
+				my_obj_data.normals.push_back(normal.z);
+
+			}
+			
+
+
+
 		}
 
 	}
@@ -225,6 +254,18 @@ void MapParser::prepare_to_draw(unsigned int shaderProgram_in)
 	
 	/* *********************** */
 
+	
+	// bind the normals
+	glBindBuffer(GL_ARRAY_BUFFER, normals_buffer);
+	glBindVertexArray(normals_buffer);
+	glBufferData(GL_ARRAY_BUFFER, my_obj_data.normals.size() * sizeof(float), my_obj_data.normals.data(), GL_STATIC_DRAW);
+
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glEnableVertexAttribArray(2);
+
+	/* *********************** */
+
+
 	// bind indices
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, my_map_data.map_indices.size() * sizeof(unsigned int), my_map_data.map_indices.data(), GL_STATIC_DRAW);
@@ -233,7 +274,7 @@ void MapParser::prepare_to_draw(unsigned int shaderProgram_in)
 
 }
 
-void MapParser::draw(glm::mat4 ViewProjection_in)
+void MapParser::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 lightColor, float ambiance)
 {
 
 
@@ -255,6 +296,21 @@ void MapParser::draw(glm::mat4 ViewProjection_in)
 	MatrixID = glGetUniformLocation(shaderProgram, "ViewProjection");
 
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ViewProjection));
+
+	// couleur de lumière
+	MatrixID = glGetUniformLocation(shaderProgram, "lightColor");
+	glUniform3f(MatrixID, lightColor.x, lightColor.y, lightColor.z);
+
+	// ambiance
+	MatrixID = glGetUniformLocation(shaderProgram, "ambientStrenght");
+	glUniform1f(MatrixID, ambiance);
+
+	// positions lumière
+	MatrixID = glGetUniformLocation(shaderProgram, "lightPos");
+	glUniform3f(MatrixID, lightPos.x, lightPos.y, lightPos.z);
+
+	/* ******************** */
+
 
 	/* *********************  */
 

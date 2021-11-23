@@ -26,9 +26,6 @@ public:
     void run(GLFWwindow* window_in, unsigned int shaderProgram_in);
 
 private:
-    float deltaTickLoop = 0;
-    float translationLoop = 5;
-    bool translationLoopB = false;
 
     glm::mat4 Projection = glm::mat4(0.0f);
     glm::mat4 View = glm::mat4(0.0f);
@@ -72,7 +69,6 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
     MapParser map((char*)"./Assets/map/grayscale_heightmap.png");
     map.prepare_to_draw(shaderProgram);
 
-    float ambiance = 0.1f;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -100,6 +96,9 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
 
          /*  transformations matrices */
 
+        glm::vec3 soleilPos = glm::vec3(0.0f, 600.0f, 50.0f);
+        glm::vec3 soleilColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
         Projection = glm::perspective(glm::radians(45.0f), (1024.0f / 768.0f), 1.0f, 100.0f);
 
         // Camera
@@ -109,14 +108,13 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
         /* ********************* */
 
 
-        map.draw(Projection * View);
+        map.draw(Projection * View, soleilPos, soleilColor, 1.0f);
 
         
-        //glm::mat4 Model = cube.translate(glm::vec3(translationLoop, 0.0f, 5.0f), glm::mat4(1.0f));
+        glm::mat4 Model = importerAssimpTest.translate(glm::vec3(10.0f, 1.0f, 10.0f), glm::mat4(1.0f));
         //Model = cube.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(1, 0, 0));
    
-        importerAssimpTest.draw(Projection * View, ambiance+=0.005f);
-        if (ambiance > 1.0f) ambiance = 0.0f;
+        importerAssimpTest.draw(Projection * View, 1.0f, soleilPos, Model);
 
         //Model = sphere_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
         //Model = sphere_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));
@@ -132,20 +130,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
         /* Poll for and process events */
         glfwPollEvents();
 
-        // increament delta Tick Loop
-        deltaTickLoop++;
-
-        if (deltaTickLoop >= 360) deltaTickLoop = 0;
-
-
-
-        if (translationLoop < -5) translationLoopB = true;
-        else if (translationLoop > 5) translationLoopB = false;
-
-        if (translationLoopB) translationLoop += 0.2f;
-        else translationLoop -= 0.2f;
-
-
+      
 
 
 

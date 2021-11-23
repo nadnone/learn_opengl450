@@ -29,19 +29,21 @@ Shader_Compilation::Shader_Compilation()
 
                 layout(location = 0) in vec3 modelPos;
                 layout(location = 1) in vec3 colorDataIn;
-                layout(location = 2) in vec4 normalsDataIn;
+                layout(location = 2) in vec3 normalsDataIn;
 
                 uniform mat4 Model;
                 uniform mat4 ViewProjection;
 
                 out vec3 vertexColor;
-                out vec4 vertexNormals;
+                out vec3 vertexNormals;
+                out vec3 fragPos;
 
                 void main()
                 {
                     gl_Position = ViewProjection * Model * vec4(modelPos, 1.0f);
                     vertexColor = colorDataIn;
                     vertexNormals = normalsDataIn;
+                    fragPos = vec3(Model * vec4(modelPos, 1.0f));
                 }
                 )glsl";
     unsigned int vertexShader;
@@ -53,7 +55,8 @@ Shader_Compilation::Shader_Compilation()
                 #version 450 core
 
                 in vec3 vertexColor;
-                in vec4 vertexNormals;
+                in vec3 vertexNormals;
+                in vec3 fragPos;
 
                 out vec4 FragColor;
 
@@ -64,7 +67,15 @@ Shader_Compilation::Shader_Compilation()
 
                 void main()
                 {
-	                FragColor = vec4(ambientStrenght * lightColor * vertexColor, 1.0f);
+                    vec3 norm = normalize(vertexNormals);
+                    vec3 lightDir = normalize(lightPos - fragPos);
+                    
+                    float delta = max(dot( norm, lightDir ), 0.0f);            
+                    vec3 diffuse = delta * lightColor;
+
+                    vec3 result = (ambientStrenght + diffuse) * vertexColor;
+
+	                FragColor = vec4(result, 1.0f);
                 }
         )glsl";
         
