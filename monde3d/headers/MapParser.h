@@ -17,7 +17,7 @@ class MapParser
 public:
 	MapParser(char * filename);
 	~MapParser();
-	void draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 lightColor, float ambiance);
+	void draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 lightColor, glm::vec3 camPos);
 	void prepare_to_draw(unsigned int shaderProgram_in);
 
 
@@ -275,7 +275,7 @@ void MapParser::prepare_to_draw(unsigned int shaderProgram_in)
 
 }
 
-void MapParser::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 lightColor, float ambiance)
+void MapParser::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 lightColor, glm::vec3 camPos)
 {
 
 
@@ -303,12 +303,16 @@ void MapParser::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 
 	glUniform3f(MatrixID, lightColor.x, lightColor.y, lightColor.z);
 
 	// ambiance
-	MatrixID = glGetUniformLocation(shaderProgram, "ambientStrenght");
-	glUniform1f(MatrixID, ambiance);
+	//MatrixID = glGetUniformLocation(shaderProgram, "ambientStrenght");
+	//glUniform1f(MatrixID, ambiance);
 
 	// positions lumière
 	MatrixID = glGetUniformLocation(shaderProgram, "lightPos");
 	glUniform3f(MatrixID, lightPos.x, lightPos.y, lightPos.z);
+
+	// positions camera
+	MatrixID = glGetUniformLocation(shaderProgram, "camPos");
+	glUniform3f(MatrixID, camPos.x, camPos.y, camPos.z);
 
 	/* ******************** */
 

@@ -11,7 +11,7 @@ class ObjImporter
 public:
 	ObjImporter(const char * filename, float scale);
 	~ObjImporter();
-	void draw(glm::mat4 ViewProjection_in, float ambiance_in, glm::vec3 lightPos, glm::mat4 Model_in);
+	void draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::mat4 Model_in);
 	void prepare_to_draw(unsigned int shaderProgram);
 	glm::mat4 translate(glm::vec3 translation_direction, glm::mat4 Model_in);
 	glm::mat4 rotate(float angle, glm::mat4 Model_in, glm::vec3 axe);
@@ -227,14 +227,12 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 
 }
 
-void ObjImporter::draw(glm::mat4 ViewProjection_in, float ambiance_in, glm::vec3 lightPos, glm::mat4 Model_in)
+void ObjImporter::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::mat4 Model_in)
 {
 
 	Model = Model_in;
 	ViewProjection = ViewProjection_in;
-	float ambiance = ambiance_in;
-
-
+	
 	glUseProgram(shaderProgram);
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); // vertices
@@ -262,8 +260,8 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, float ambiance_in, glm::vec3
 	glUniform3f(MatrixID, LightColor.x, LightColor.y, LightColor.z);
 
 	// ambiance
-	MatrixID = glGetUniformLocation(shaderProgram, "ambientStrenght");
-	glUniform1f(MatrixID, ambiance);
+	//MatrixID = glGetUniformLocation(shaderProgram, "ambientStrenght");
+	//glUniform1f(MatrixID, ambiance);
 
 	// positions lumière
 	MatrixID = glGetUniformLocation(shaderProgram, "lightPos");

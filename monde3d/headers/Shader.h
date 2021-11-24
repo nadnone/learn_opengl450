@@ -62,25 +62,34 @@ Shader_Compilation::Shader_Compilation()
 
                 uniform vec3 lightColor;
                 uniform vec3 lightPos;
+                uniform vec3 camPos;
 
-                uniform float ambientStrenght;
+                //uniform float ambientStrenght;
+                float specularStrenght = 0.5f;
+                float ambientStrenght = 1.0f;
+
 
                 void main()
                 {
                     vec3 norm = normalize(vertexNormals);
                     vec3 lightDir = normalize(lightPos - fragPos);
                     
-                    float delta = max(dot( norm, lightDir ), 0.0f);            
-                    vec3 diffuse = delta * lightColor;
+                    vec3 camDir = normalize(camPos - fragPos);
+                    vec3 reflectDir = reflect(-lightDir, norm);
+                    
+                    float spec = pow(max(dot(camDir, reflectDir), 0.0f), 32);
+                    vec3 specular = specularStrenght * spec * lightColor;
 
-                    vec3 result = (ambientStrenght + diffuse) * vertexColor;
+                    float diff = max(dot( norm, lightDir ), 0.0f);            
+                    vec3 diffuse = diff * lightColor;
+
+                    vec3 result = (ambientStrenght + diffuse + specular) * vertexColor;
 
 	                FragColor = vec4(result, 1.0f);
                 }
         )glsl";
         
     // TODO Comprendre les materials
-    // TODO calculer la lumière à partir d'un soleil virtuel
 
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
