@@ -10,7 +10,7 @@
 
 
 struct mouse_keyboard {
-	glm::vec3 position = glm::vec3(0.0f);
+	glm::vec3 position = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::vec3 direction = glm::vec3(0.0f);
 	glm::vec2 angle = glm::vec2(0.0f);	
 	glm::vec3 camFront = glm::vec3(0.0f);

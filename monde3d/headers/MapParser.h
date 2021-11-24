@@ -30,7 +30,7 @@ private:
 		normals_buffer = 0;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;
-	const float COEFF = 0.1f;
+	const float COEFF = 0.5f;
 };
 
 MapParser::MapParser(char* filename)
@@ -83,7 +83,7 @@ MapParser::MapParser(char* filename)
 
 			// on centre l'objet dans le monde
 			x_pos -= (width / 2);
-			y_pos -= (height / 2) - 200;
+			y_pos -= (height / 2);
 
 			// on multiplie les positions par un coefficien pour dominuer leur taille
 			x_pos *= COEFF; 
@@ -196,12 +196,13 @@ MapParser::MapParser(char* filename)
 					normal,
 					glm::vec3(position_carre[order[nb + 2]][0], position_carre[order[nb + 2]][1], position_carre[order[nb + 2]][2])
 				);
-				
 
-				my_obj_data.normals.push_back(normal.x);
-				my_obj_data.normals.push_back(normal.y);
-				my_obj_data.normals.push_back(normal.z);
-
+				for  (unsigned i = 0; i < 3; i++)
+				{
+					my_obj_data.normals.push_back(normal.x);
+					my_obj_data.normals.push_back(normal.y);
+					my_obj_data.normals.push_back(normal.z);
+				}
 			}
 			
 

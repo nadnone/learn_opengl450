@@ -50,9 +50,9 @@ void ObjImporter::processMesh(aiMesh *mesh, const aiScene* scene)
 		mesh_data.map_vertices.push_back(mesh->mVertices[i].y * coeff);
 
 		// couleur 
-		mesh_data.map_colors.push_back(166.0f / 255);
-		mesh_data.map_colors.push_back(127.0f / 255);
-		mesh_data.map_colors.push_back(10.0f / 255);
+		mesh_data.map_colors.push_back(230.0f / 255);
+		mesh_data.map_colors.push_back(206.0f / 255);
+		mesh_data.map_colors.push_back(160.0f / 255);
 
 
 		// normals
