@@ -30,7 +30,7 @@ private:
 		normals_buffer = 0;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;
-	const float COEFF = 0.5f;
+	const float COEFF = 0.1f;
 };
 
 MapParser::MapParser(char* filename)
@@ -203,7 +203,6 @@ MapParser::MapParser(char* filename)
 				}
 
 
-				// gestion Phong
 				
 			}
 			
@@ -215,9 +214,9 @@ MapParser::MapParser(char* filename)
 	}
 
 	// initialisation des donnnée Phong
-	my_obj_data.material.ambiant = glm::vec3(1.0f, 0.5f, 0.3f);
+	my_obj_data.material.ambiant = glm::vec3(0.9f, 0.5f, 0.5f);
 	my_obj_data.material.shininess = 32.0f;
-	my_obj_data.material.diffuse = glm::vec3(1.0f, 0.5f, 0.3f);
+	my_obj_data.material.diffuse = glm::vec3(0.2f, 0.3f, 0.2f);
 	my_obj_data.material.specular = glm::vec3(0.5f);
 
 
@@ -316,6 +315,11 @@ void MapParser::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 
 	// positions lumière
 	MatrixID = glGetUniformLocation(shaderProgram, "lightPos");
 	glUniform3f(MatrixID, lightPos.x, lightPos.y, lightPos.z);
+
+	// direction lumière
+	//MatrixID = glGetUniformLocation(shaderProgram, "lightDirection");
+	//glUniform3f(MatrixID, -0.2f, -500.0f, -0.3f);
+
 
 	/* ********************** */
 

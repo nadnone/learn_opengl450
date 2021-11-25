@@ -62,6 +62,7 @@ Shader_Compilation::Shader_Compilation()
 
                 uniform vec3 lightColor;
                 uniform vec3 lightPos;
+                //uniform vec3 lightDirection;
                 uniform vec3 camPos;
 
                
@@ -99,7 +100,7 @@ Shader_Compilation::Shader_Compilation()
                    
 
                     // result
-                    vec3 result = (ambient + diffuse + specular);
+                    vec3 result = (ambient + diffuse + specular) * vertexColor * 10.0f;
 	                FragColor = vec4(result, 1.0f);
                 }
         )glsl";

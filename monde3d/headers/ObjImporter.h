@@ -49,9 +49,9 @@ void ObjImporter::processMesh(aiMesh *mesh, const aiScene* scene)
 		mesh_data.map_vertices.push_back(mesh->mVertices[i].y * coeff);
 
 		// couleur 
-		mesh_data.map_colors.push_back(230.0f / 255);
-		mesh_data.map_colors.push_back(206.0f / 255);
-		mesh_data.map_colors.push_back(160.0f / 255);
+		//mesh_data.map_colors.push_back(230.0f / 255);
+		//mesh_data.map_colors.push_back(206.0f / 255);
+		//mesh_data.map_colors.push_back(160.0f / 255);
 
 
 		// normals
@@ -291,6 +291,9 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec
 	MatrixID = glGetUniformLocation(shaderProgram, "lightPos");
 	glUniform3f(MatrixID, lightPos.x, lightPos.y, lightPos.z);
 
+	// direction lumière
+	//MatrixID = glGetUniformLocation(shaderProgram, "lightDirection");
+	//glUniform3f(MatrixID, -0.2f, -500.0f, -0.3f);
 
 
 	/* ********************** */

@@ -94,7 +94,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
         
          /*  transformations matrices */
 
-        glm::vec3 soleilPos = glm::vec3(0.0f, 500.0f, 0.0f);
+        glm::vec3 soleilPos = glm::vec3(0.0f, 512 * 100.0f, 0.0f);
         glm::vec3 soleilColor = glm::vec3(1.0f);
 
         Projection = glm::perspective(glm::radians(45.0f), (1024.0f / 768.0f), 1.0f, 100.0f);
