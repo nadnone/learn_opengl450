@@ -11,7 +11,7 @@ class ObjImporter
 public:
 	ObjImporter(const char * filename, float scale);
 	~ObjImporter();
-	void draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 lightColor, glm::mat4 Model_in);
+	void draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::vec3 camPos, glm::mat4 Model_in);
 	void prepare_to_draw(unsigned int shaderProgram);
 	glm::mat4 translate(glm::vec3 translation_direction, glm::mat4 Model_in);
 	glm::mat4 rotate(float angle, glm::mat4 Model_in, glm::vec3 axe);
@@ -126,6 +126,7 @@ void ObjImporter::processNode(aiNode* node, const aiScene* scene)
 				aiColor3D ambiant;
 				material->Get(AI_MATKEY_COLOR_AMBIENT, ambiant);
 				my_obj_data.material.ambiant = glm::vec3(ambiant.r, ambiant.g, ambiant.b);
+
 			}
 
 			processMesh(mesh, scene);
@@ -161,7 +162,7 @@ ObjImporter::ObjImporter(const char * filename, float scale)
 
 
 
-	if (!scene && !importer.GetErrorString() == ' ' && !scene->mNumMeshes > 0)
+	if (!scene && !importer.GetErrorString() && !scene->mNumMeshes > 0)
 	{
 		printf("Erreur importation: %s\n", importer.GetErrorString());
 		exit(1);
@@ -218,14 +219,15 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 
 	/* ****************************************** */
 
-	// bind the couelur
+	// bind the couleur
+	/*
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
 	glBindVertexArray(color_buffer);
 	glBufferData(GL_ARRAY_BUFFER, mesh_data.map_colors.size() * sizeof(float), mesh_data.map_colors.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);
-
+	*/
 	/* *********************** */
 
 
@@ -255,7 +257,7 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 
 }
 
-void ObjImporter::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 lightColor, glm::mat4 Model_in)
+void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::vec3 camPos, glm::mat4 Model_in)
 {
 
 	Model = Model_in;
@@ -283,17 +285,21 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec
 
 	/* LUMIERE */
 
-	// couleur de lumière
-	MatrixID = glGetUniformLocation(shaderProgram, "lightColor");
-	glUniform3f(MatrixID, lightColor.x, lightColor.y, lightColor.z);
+	// diffuse
+	MatrixID = glGetUniformLocation(shaderProgram, "light.diffuse");
+	glUniform3f(MatrixID, light.diffuse.x, light.diffuse.y, light.diffuse.z);
 
-	// positions lumière
-	MatrixID = glGetUniformLocation(shaderProgram, "lightPos");
-	glUniform3f(MatrixID, lightPos.x, lightPos.y, lightPos.z);
+	// ambient
+	MatrixID = glGetUniformLocation(shaderProgram, "light.ambient");
+	glUniform3f(MatrixID, light.ambient.x, light.ambient.y, light.ambient.z);
 
-	// direction lumière
-	//MatrixID = glGetUniformLocation(shaderProgram, "lightDirection");
-	//glUniform3f(MatrixID, -0.2f, -500.0f, -0.3f);
+	// specular
+	MatrixID = glGetUniformLocation(shaderProgram, "light.specular");
+	glUniform3f(MatrixID, light.specular.x, light.specular.y, light.specular.z);
+
+	// position
+	MatrixID = glGetUniformLocation(shaderProgram, "light.position");
+	glUniform3f(MatrixID, light.position.x, light.position.y, light.position.z);
 
 
 	/* ********************** */
@@ -301,8 +307,8 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec
 	
 	/* PHONG */
 
-	// ambiant
-	MatrixID = glGetUniformLocation(shaderProgram, "material.ambientStrenght");
+	// ambient
+	MatrixID = glGetUniformLocation(shaderProgram, "material.ambient");
 	glUniform3f(MatrixID, my_obj_data.material.ambiant.x, my_obj_data.material.ambiant.y, my_obj_data.material.ambiant.z);
 
 	// shininess
@@ -317,9 +323,6 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec
 	MatrixID = glGetUniformLocation(shaderProgram, "material.diffuse");
 	glUniform3f(MatrixID, my_obj_data.material.diffuse.x, my_obj_data.material.diffuse.y, my_obj_data.material.diffuse.z);
 
-
-
-	/* ******************** */
 
 
 	//draw

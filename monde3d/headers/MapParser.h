@@ -17,7 +17,7 @@ class MapParser
 public:
 	MapParser(char * filename);
 	~MapParser();
-	void draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 lightColor, glm::vec3 camPos);
+	void draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::vec3 camPos);
 	void prepare_to_draw(unsigned int shaderProgram_in);
 
 
@@ -30,7 +30,7 @@ private:
 		normals_buffer = 0;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;
-	const float COEFF = 0.1f;
+	const float COEFF = 1.0f;
 };
 
 MapParser::MapParser(char* filename)
@@ -143,7 +143,7 @@ MapParser::MapParser(char* filename)
 				}
 
 
-
+				/*
 				// gestion des couleurs
 				float data = image[positions_colors[order[nb]]];
 
@@ -178,6 +178,7 @@ MapParser::MapParser(char* filename)
 					my_obj_data.map_colors.push_back(194.0f / 255); // couleur de la neige
 					my_obj_data.map_colors.push_back(192.0f / 255); // couleur de la neige
 				}
+				*/
 			}
 
 
@@ -214,7 +215,7 @@ MapParser::MapParser(char* filename)
 	}
 
 	// initialisation des donnnée Phong
-	my_obj_data.material.ambiant = glm::vec3(0.9f, 0.5f, 0.5f);
+	my_obj_data.material.ambiant = glm::vec3(0.1f);
 	my_obj_data.material.shininess = 32.0f;
 	my_obj_data.material.diffuse = glm::vec3(0.2f, 0.3f, 0.2f);
 	my_obj_data.material.specular = glm::vec3(0.5f);
@@ -250,17 +251,14 @@ void MapParser::prepare_to_draw(unsigned int shaderProgram_in)
 	/* ****************************************** */
 
 	// bind the couelur
-	
+	/*
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
 	glBindVertexArray(color_buffer);
-	// bind des couleurs
+
 	glBufferData(GL_ARRAY_BUFFER, my_obj_data.map_colors.size() * sizeof(float), my_obj_data.map_colors.data(), GL_STATIC_DRAW);
-
-
-	// couleurs
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);
-	
+	*/
 	/* *********************** */
 
 	
@@ -283,7 +281,7 @@ void MapParser::prepare_to_draw(unsigned int shaderProgram_in)
 
 }
 
-void MapParser::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 lightColor, glm::vec3 camPos)
+void MapParser::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::vec3 camPos)
 {
 
 
@@ -308,25 +306,28 @@ void MapParser::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 
 
 	/* LUMIERE */
 
-	// couleur de lumière
-	MatrixID = glGetUniformLocation(shaderProgram, "lightColor");
-	glUniform3f(MatrixID, lightColor.x, lightColor.y, lightColor.z);
+	// diffuse
+	MatrixID = glGetUniformLocation(shaderProgram, "light.diffuse");
+	glUniform3f(MatrixID, light.diffuse.x, light.diffuse.y, light.diffuse.z);
 
-	// positions lumière
-	MatrixID = glGetUniformLocation(shaderProgram, "lightPos");
-	glUniform3f(MatrixID, lightPos.x, lightPos.y, lightPos.z);
+	// ambient
+	MatrixID = glGetUniformLocation(shaderProgram, "light.ambient");
+	glUniform3f(MatrixID, light.ambient.x, light.ambient.y, light.ambient.z);
 
-	// direction lumière
-	//MatrixID = glGetUniformLocation(shaderProgram, "lightDirection");
-	//glUniform3f(MatrixID, -0.2f, -500.0f, -0.3f);
+	// specular
+	MatrixID = glGetUniformLocation(shaderProgram, "light.specular");
+	glUniform3f(MatrixID, light.specular.x, light.specular.y, light.specular.z);
 
+	// position
+	MatrixID = glGetUniformLocation(shaderProgram, "light.position");
+	glUniform3f(MatrixID, light.position.x, light.position.y, light.position.z);
 
 	/* ********************** */
 
 
 	/* PHONG */
 
-	// ambiant
+	// ambient
 	MatrixID = glGetUniformLocation(shaderProgram, "material.ambient");
 	glUniform3f(MatrixID, my_obj_data.material.ambiant.x, my_obj_data.material.ambiant.y, my_obj_data.material.ambiant.z);
 
@@ -341,11 +342,6 @@ void MapParser::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 
 	// diffuse
 	MatrixID = glGetUniformLocation(shaderProgram, "material.diffuse");
 	glUniform3f(MatrixID, my_obj_data.material.diffuse.x, my_obj_data.material.diffuse.y, my_obj_data.material.diffuse.z);
-
-
-
-	/* ******************** */
-
 
 	/* *********************  */
 

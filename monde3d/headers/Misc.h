@@ -15,6 +15,12 @@ public:
 	~Misc();
     void exitProgram(GLFWwindow *window);
 
+    struct light_data {
+        glm::vec3 diffuse = glm::vec3(0.5f);
+        glm::vec3 ambient = glm::vec3(0.2f);
+        glm::vec3 specular = glm::vec3(1.0f);
+        glm::vec3 position = glm::vec3(0.0f, 5.0f, 0.0f);
+    };
 
     struct Material_data {
         float shininess = 0.0f;
