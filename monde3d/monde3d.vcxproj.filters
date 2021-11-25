@@ -20,14 +20,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="vertexshader.txt">
-      <Filter>src</Filter>
-    </Text>
-    <Text Include="fragmentshader.txt">
-      <Filter>src</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="headers\ObjReader.h">
       <Filter>headers</Filter>
     </ClInclude>

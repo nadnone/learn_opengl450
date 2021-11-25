@@ -1,3 +1,6 @@
+/*
+Fichier obsolète, peut être supprimé
+*/
 #pragma once
 
 #include <string>

@@ -15,19 +15,22 @@ public:
 	~Misc();
     void exitProgram(GLFWwindow *window);
 
+
+    struct Material_data {
+        float shininess = 0.0f;
+        glm::vec3 ambiant = glm::vec3(1.0f);
+        glm::vec3 diffuse = glm::vec3(0.0f);
+        glm::vec3 specular = glm::vec3(0.0f);
+    };
+    
     struct obj_data {
         std::vector<float> map_vertices;
         std::vector<unsigned int> map_indices;
         std::vector<float> map_colors;
         std::vector<float> textures;
         std::vector<float> normals;
+        Material_data material;
     };
-    /*
-    struct Material_data {
-        
-    };
-    */
-    // TODO learn Materials
 
 private:
 

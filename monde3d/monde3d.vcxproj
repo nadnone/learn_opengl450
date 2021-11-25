@@ -24,10 +24,6 @@
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="fragmentshader.txt" />
-    <Text Include="vertexshader.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="headers\GameLoop.h" />
     <ClInclude Include="headers\Input_event.h" />
     <ClInclude Include="headers\MapParser.h" />

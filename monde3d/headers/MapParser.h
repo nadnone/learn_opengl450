@@ -46,8 +46,6 @@ MapParser::MapParser(char* filename)
 	Model = glm::mat4(1.0f);
 
 
-
-
 	// decode heightmap
 	std::vector<unsigned char> image;
 	unsigned width, height;
@@ -203,6 +201,10 @@ MapParser::MapParser(char* filename)
 					my_obj_data.normals.push_back(normal.y);
 					my_obj_data.normals.push_back(normal.z);
 				}
+
+
+				// gestion Phong
+				
 			}
 			
 
@@ -211,6 +213,13 @@ MapParser::MapParser(char* filename)
 		}
 
 	}
+
+	// initialisation des donnnée Phong
+	my_obj_data.material.ambiant = glm::vec3(1.0f, 0.5f, 0.3f);
+	my_obj_data.material.shininess = 32.0f;
+	my_obj_data.material.diffuse = glm::vec3(1.0f, 0.5f, 0.3f);
+	my_obj_data.material.specular = glm::vec3(0.5f);
+
 
 }
 void MapParser::prepare_to_draw(unsigned int shaderProgram_in) 
@@ -298,21 +307,38 @@ void MapParser::draw(glm::mat4 ViewProjection_in, glm::vec3 lightPos, glm::vec3 
 
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ViewProjection));
 
+	/* LUMIERE */
+
 	// couleur de lumière
 	MatrixID = glGetUniformLocation(shaderProgram, "lightColor");
 	glUniform3f(MatrixID, lightColor.x, lightColor.y, lightColor.z);
-
-	// ambiance
-	//MatrixID = glGetUniformLocation(shaderProgram, "ambientStrenght");
-	//glUniform1f(MatrixID, ambiance);
 
 	// positions lumière
 	MatrixID = glGetUniformLocation(shaderProgram, "lightPos");
 	glUniform3f(MatrixID, lightPos.x, lightPos.y, lightPos.z);
 
-	// positions camera
-	MatrixID = glGetUniformLocation(shaderProgram, "camPos");
-	glUniform3f(MatrixID, camPos.x, camPos.y, camPos.z);
+	/* ********************** */
+
+
+	/* PHONG */
+
+	// ambiant
+	MatrixID = glGetUniformLocation(shaderProgram, "material.ambient");
+	glUniform3f(MatrixID, my_obj_data.material.ambiant.x, my_obj_data.material.ambiant.y, my_obj_data.material.ambiant.z);
+
+	// shininess
+	MatrixID = glGetUniformLocation(shaderProgram, "material.shininess");
+	glUniform1f(MatrixID, my_obj_data.material.shininess);
+
+	// specular
+	MatrixID = glGetUniformLocation(shaderProgram, "material.specular");
+	glUniform3f(MatrixID, my_obj_data.material.specular.x, my_obj_data.material.specular.y, my_obj_data.material.specular.z);
+
+	// diffuse
+	MatrixID = glGetUniformLocation(shaderProgram, "material.diffuse");
+	glUniform3f(MatrixID, my_obj_data.material.diffuse.x, my_obj_data.material.diffuse.y, my_obj_data.material.diffuse.z);
+
+
 
 	/* ******************** */
 
