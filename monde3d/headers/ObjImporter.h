@@ -49,9 +49,9 @@ void ObjImporter::processMesh(aiMesh *mesh, const aiScene* scene)
 		mesh_data.map_vertices.push_back(mesh->mVertices[i].y * coeff);
 
 		// couleur 
-		//mesh_data.map_colors.push_back(230.0f / 255);
-		//mesh_data.map_colors.push_back(206.0f / 255);
-		//mesh_data.map_colors.push_back(160.0f / 255);
+		mesh_data.map_colors.push_back(95.0f / 255);
+		mesh_data.map_colors.push_back(67.0f / 255);
+		mesh_data.map_colors.push_back(54.0f / 255);
 
 
 		// normals
@@ -127,6 +127,12 @@ void ObjImporter::processNode(aiNode* node, const aiScene* scene)
 				material->Get(AI_MATKEY_COLOR_AMBIENT, ambiant);
 				my_obj_data.material.ambiant = glm::vec3(ambiant.r, ambiant.g, ambiant.b);
 
+				// color
+				aiColor3D color;
+				material->Get(AI_MATKEY_BASE_COLOR, color);
+				//my_obj_data.material.color = glm::vec3(color.r, color.g, color.b);
+				
+				// TODO récupérer la couleur du material
 			}
 
 			processMesh(mesh, scene);
@@ -220,14 +226,14 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 	/* ****************************************** */
 
 	// bind the couleur
-	/*
+	
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
 	glBindVertexArray(color_buffer);
 	glBufferData(GL_ARRAY_BUFFER, mesh_data.map_colors.size() * sizeof(float), mesh_data.map_colors.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);
-	*/
+	
 	/* *********************** */
 
 
@@ -268,7 +274,11 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); // vertices
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer); // indices
 
-
+	// initialisation des donnnée Phong
+	my_obj_data.material.ambiant = glm::vec3(0.1f);
+	my_obj_data.material.shininess = 10.0f;
+	my_obj_data.material.diffuse = glm::vec3(0.2f, 0.3f, 0.2f);
+	my_obj_data.material.specular = glm::vec3(0.5f);
 
 	/* transformation */
 
@@ -281,6 +291,12 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ViewProjection));
 
 	/* *********************  */
+
+
+	// eye normal
+	MatrixID = glGetUniformLocation(shaderProgram, "eyePos");
+	glUniform3f(MatrixID, camPos.x, camPos.y, camPos.z);
+
 
 
 	/* LUMIERE */
@@ -301,10 +317,9 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	MatrixID = glGetUniformLocation(shaderProgram, "light.position");
 	glUniform3f(MatrixID, light.position.x, light.position.y, light.position.z);
 
-
 	/* ********************** */
-	
-	
+
+
 	/* PHONG */
 
 	// ambient
@@ -323,6 +338,10 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	MatrixID = glGetUniformLocation(shaderProgram, "material.diffuse");
 	glUniform3f(MatrixID, my_obj_data.material.diffuse.x, my_obj_data.material.diffuse.y, my_obj_data.material.diffuse.z);
 
+	// color
+	//MatrixID = glGetUniformLocation(shaderProgram, "material.color");
+	//glUniform3f(MatrixID, my_obj_data.material.color.x, my_obj_data.material.color.y, my_obj_data.material.color.z);
+	/* *********************  */
 
 
 	//draw

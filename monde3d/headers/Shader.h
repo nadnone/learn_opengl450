@@ -36,12 +36,14 @@ Shader_Compilation::Shader_Compilation()
 
                 out vec3 vertexNormals;
                 out vec3 fragPos;
+                out vec3 colorsVertex;
 
                 void main()
                 {
                     gl_Position = ViewProjection * Model * vec4(modelPos, 1.0f);
                     vertexNormals = normalsDataIn;
                     fragPos = vec3(Model * vec4(modelPos, 1.0f));
+                    colorsVertex = colorDataIn;
                 }
                 )glsl";
     unsigned int vertexShader;
@@ -54,16 +56,18 @@ Shader_Compilation::Shader_Compilation()
 
                 in vec3 vertexNormals;
                 in vec3 fragPos;
+                in vec3 colorsVertex;
 
                 out vec4 FragColor;
 
-                uniform vec3 camPos;
+                uniform vec3 eyePos;
                
                 struct Material {
                     float shininess;
                     vec3 ambient;
                     vec3 diffuse;
                     vec3 specular;
+                    vec3 color;
                 };
                 uniform Material material;
 
@@ -84,25 +88,31 @@ Shader_Compilation::Shader_Compilation()
                     vec3 norm = normalize(vertexNormals);
                     vec3 lightDir = normalize(light.position - fragPos);
 
-                    float diff = max(dot( norm, lightDir ), 0.0f);            
-                    vec3 diffuse = light.diffuse * diff * material.diffuse;
+                    float diffuseDot = max( 0.0f, dot( norm, lightDir ) );            
+                    vec3 diffuse = light.diffuse * diffuseDot * material.diffuse;
+
                     /* ******************** */
 
-                    // specular
-                    vec3 camDir = normalize(camPos - fragPos);
-                    vec3 reflectDir = reflect(-lightDir, norm);
 
-                    float spec = pow(max(dot(camDir, reflectDir), 0.0f), material.shininess);
+                    // specular
+
+                    vec3 eyeNormal = normalize(eyePos);
+                    vec3 vReglection = reflect(-lightDir, eyeNormal);
+
+                    float eyeReflectionAngle = max(0.0f, dot(eyeNormal, vReglection));
+                    float spec = pow(eyeReflectionAngle, material.shininess);
+
                     vec3 specular = light.specular * spec * material.specular;
+
                     /* ******************** */
 
                     // result
-                    vec3 result = (ambient + diffuse + specular);
+                    vec3 result = (colorsVertex + material.color) - (ambient + diffuse + specular);
 	                FragColor = vec4(result, 1.0f);
                 }
         )glsl";
         
-    // TODO Comprendre le directional lighting 
+    // TODO Comprendre le lighting 
 
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);

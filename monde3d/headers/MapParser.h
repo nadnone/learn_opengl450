@@ -30,7 +30,8 @@ private:
 		normals_buffer = 0;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;
-	const float COEFF = 1.0f;
+	const float COEFF = 1.0f,
+		COEFF_HAUTEUR = 10.0f;
 };
 
 MapParser::MapParser(char* filename)
@@ -92,25 +93,25 @@ MapParser::MapParser(char* filename)
 				// 0 = 1
 				{
 					x_pos,
-					z[ (x_pixel * RGBA_nb) + (y_pixel * width * RGBA_nb)],
+					z[ (x_pixel * RGBA_nb) + (y_pixel * width * RGBA_nb)] * (height / COEFF_HAUTEUR),
 					y_pos
 				},					
 				// 1 = 2
 				{ 
 					x_pos + COEFF,
-					z[( (1 + x_pixel) * RGBA_nb) + (y_pixel * width * RGBA_nb)],
+					z[( (1 + x_pixel) * RGBA_nb) + (y_pixel * width * RGBA_nb)] * (height / COEFF_HAUTEUR),
 					y_pos
 				},
 				// 2 = 4
 				{ 
 					x_pos, 
-					z[( x_pixel * RGBA_nb) + ((1 + y_pixel) * width * RGBA_nb)],
+					z[( x_pixel * RGBA_nb) + ((1 + y_pixel) * width * RGBA_nb)] * (height / COEFF_HAUTEUR),
 					COEFF + y_pos
 				},
 				// 3 = 5
 				{ 
 					COEFF + x_pos,
-					z[( (1 + x_pixel) * RGBA_nb) + ((1 + y_pixel) * width * RGBA_nb)],
+					z[( (1 + x_pixel) * RGBA_nb) + ((1 + y_pixel) * width * RGBA_nb)] * (height / COEFF_HAUTEUR),
 					COEFF + y_pos
 				}	
 			};
@@ -143,7 +144,7 @@ MapParser::MapParser(char* filename)
 				}
 
 
-				/*
+				
 				// gestion des couleurs
 				float data = image[positions_colors[order[nb]]];
 
@@ -162,23 +163,23 @@ MapParser::MapParser(char* filename)
 				}
 				else if (data < 127.5f)
 				{
-					my_obj_data.map_colors.push_back(10.0f / 255); // couleur de l'herbe
+					my_obj_data.map_colors.push_back(86.0f / 255); // couleur de l'herbe
 					my_obj_data.map_colors.push_back(125.0f / 255); // couleur de l'herbe
-					my_obj_data.map_colors.push_back(18.0f / 255); // couleur de l'herbe
+					my_obj_data.map_colors.push_back(70.0f / 255); // couleur de l'herbe
 				}
 				else if (data < 170.0f)
 				{
-					my_obj_data.map_colors.push_back(1180.f / 255); // couleur de la pierre
-					my_obj_data.map_colors.push_back(1200.f / 255); // couleur de la pierre
-					my_obj_data.map_colors.push_back(1170.f / 255); // couleur de la pierre
+					my_obj_data.map_colors.push_back(128.0f / 255); // couleur de la pierre
+					my_obj_data.map_colors.push_back(132.0f / 255); // couleur de la pierre
+					my_obj_data.map_colors.push_back(135.0f / 255); // couleur de la pierre
 				}
 				else if (data < 255.0f)
 				{
-					my_obj_data.map_colors.push_back(194.0f / 255); // couleur de la neige
-					my_obj_data.map_colors.push_back(194.0f / 255); // couleur de la neige
-					my_obj_data.map_colors.push_back(192.0f / 255); // couleur de la neige
+					my_obj_data.map_colors.push_back(250.0f / 255); // couleur de la neige
+					my_obj_data.map_colors.push_back(250.0f / 255); // couleur de la neige
+					my_obj_data.map_colors.push_back(250.0f / 255); // couleur de la neige
 				}
-				*/
+				
 			}
 
 
@@ -251,14 +252,14 @@ void MapParser::prepare_to_draw(unsigned int shaderProgram_in)
 	/* ****************************************** */
 
 	// bind the couelur
-	/*
+
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
 	glBindVertexArray(color_buffer);
 
 	glBufferData(GL_ARRAY_BUFFER, my_obj_data.map_colors.size() * sizeof(float), my_obj_data.map_colors.data(), GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);
-	*/
+	
 	/* *********************** */
 
 	
@@ -303,6 +304,14 @@ void MapParser::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::v
 	MatrixID = glGetUniformLocation(shaderProgram, "ViewProjection");
 
 	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ViewProjection));
+	
+	/* CAMERA */
+
+	// eye normal
+	MatrixID = glGetUniformLocation(shaderProgram, "eyePos");
+	glUniform3f(MatrixID, camPos.x, camPos.y, camPos.z);
+
+
 
 	/* LUMIERE */
 

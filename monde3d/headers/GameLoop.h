@@ -55,12 +55,9 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
     window = window_in;
     shaderProgram = shaderProgram_in;
 
-    ObjImporter importerAssimpTest("./Assets/cookie.dae", 1.0f);
-    //ObjReader cube("./Assets/cube.obj");   
+    ObjImporter importerAssimpTest("./Assets/cookie_modified.dae", 1.0f);
     importerAssimpTest.prepare_to_draw(shaderProgram);
 
-    //ObjReader sphere_2("./Assets/sphere.obj");
-    //ObjReader cube_3("./Assets/cube.obj");
 
     // initialisation des Events Claviers
     Input_Event inputs(window);
@@ -95,7 +92,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
 
         Misc::light_data lightdata;
         glm::vec3 lightcolor = glm::vec3(1.0f);
-        lightdata.position = glm::vec3(0.0f, 50.0f, 0.0f);
+        lightdata.position = glm::vec3(0.0f, 500.0f, 100.0f);
         lightdata.diffuse = lightcolor * glm::vec3(0.5f);
         lightdata.ambient = lightdata.diffuse * glm::vec3(1.0f);
 
@@ -105,17 +102,24 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
         // Camera
         // 
         // Translation et rotation
-        View = glm::lookAt(camera_Pos_Angle.position, camera_Pos_Angle.position + camera_Pos_Angle.camFront, glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::vec3 cam_eye = camera_Pos_Angle.position + camera_Pos_Angle.camFront;
+        View = glm::lookAt(camera_Pos_Angle.position, cam_eye, glm::vec3(0.0f, 1.0f, 0.0f));
         /* ********************* */
 
+        if (time > 2)
+        {
+            printf("X: %f Y: %f Z: %f\n", camera_Pos_Angle.position.x, camera_Pos_Angle.position.y, camera_Pos_Angle.position.z);
 
-        map.draw(Projection * View, lightdata, camera_Pos_Angle.position);
+        }
+
+
+        map.draw(Projection * View, lightdata, cam_eye);
 
         
-        glm::mat4 Model = importerAssimpTest.translate(glm::vec3(0.0f, 4.0f, 0.0f), glm::mat4(1.0f));
+        glm::mat4 Model = importerAssimpTest.translate(glm::vec3(17.0f, 2.0f, -27.0f), glm::mat4(1.0f));
         //Model = importerAssimpTest.rotate(45.0f * 3.1415 / 180, Model, glm::vec3(1, 0, 0));
    
-        importerAssimpTest.draw(Projection * View, lightdata, camera_Pos_Angle.position, Model);
+        importerAssimpTest.draw(Projection * View, lightdata, cam_eye, Model);
 
         //Model = sphere_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
         //Model = sphere_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));

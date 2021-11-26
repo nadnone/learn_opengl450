@@ -27,8 +27,8 @@ public:
         glm::vec3 ambiant = glm::vec3(1.0f);
         glm::vec3 diffuse = glm::vec3(0.0f);
         glm::vec3 specular = glm::vec3(0.0f);
+        glm::vec3 color = glm::vec3(0.0f);
     };
-    
     struct obj_data {
         std::vector<float> map_vertices;
         std::vector<unsigned int> map_indices;

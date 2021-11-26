@@ -6,4 +6,4 @@
 - [Assimp 5.1.1](https://github.com/assimp/assimp/releases/tag/v5.1.1)
 
 ## Demo
-![spinning triangle](./readme_res/demo.png)
+![spinning triangle](./readme_res/demo.gif)
