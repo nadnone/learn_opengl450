@@ -64,10 +64,13 @@ Shader_Compilation::Shader_Compilation()
                
                 struct Material {
                     float shininess;
+                    float refract_indice;
+
                     vec3 ambient;
                     vec3 diffuse;
                     vec3 specular;
                     vec3 color;
+                    vec3 reflective;
                 };
                 uniform Material material;
 
@@ -81,10 +84,14 @@ Shader_Compilation::Shader_Compilation()
             
                 void main()
                 {
-                    // ambient
+                    // AMBIENT
+
                     vec3 ambient = light.ambient * material.ambient;
                     
-                    // diffuse
+                    /* ******************* */                    
+
+                    // DIFFUSE
+
                     vec3 norm = normalize(vertexNormals);
                     vec3 lightDir = normalize(light.position - fragPos);
 
@@ -94,20 +101,28 @@ Shader_Compilation::Shader_Compilation()
                     /* ******************** */
 
 
-                    // specular
+                    // SPECULAR
 
-                    vec3 eyeNormal = normalize(eyePos);
-                    vec3 vReglection = reflect(-lightDir, eyeNormal);
+                    vec3 eyeNormal = normalize(fragPos - eyePos);
+                    vec3 I = normalize(norm - eyeNormal);
+                    vec3 R = refract(I, norm, 1/material.refract_indice);
 
-                    float eyeReflectionAngle = max(0.0f, dot(eyeNormal, vReglection));
+                    float eyeReflectionAngle = max(dot(eyeNormal, R), 0.0f);
                     float spec = pow(eyeReflectionAngle, material.shininess);
 
                     vec3 specular = light.specular * spec * material.specular;
 
                     /* ******************** */
 
+
+                    /* REFLECTION */
+                    
+                    // TODO            
+
+                    /* ******************** */
+
                     // result
-                    vec3 result = (colorsVertex + material.color) - (ambient + diffuse + specular);
+                    vec3 result = (ambient + diffuse + specular) + (colorsVertex + material.color);
 	                FragColor = vec4(result, 1.0f);
                 }
         )glsl";

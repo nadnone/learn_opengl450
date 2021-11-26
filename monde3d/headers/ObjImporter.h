@@ -17,8 +17,6 @@ public:
 	glm::mat4 rotate(float angle, glm::mat4 Model_in, glm::vec3 axe);
 
 private:
-	Misc::obj_data my_obj_data;
-
 	unsigned int vbo = 0,
 		color_buffer = 0,
 		normals_buffer = 0,
@@ -49,10 +47,11 @@ void ObjImporter::processMesh(aiMesh *mesh, const aiScene* scene)
 		mesh_data.map_vertices.push_back(mesh->mVertices[i].y * coeff);
 
 		// couleur 
+		
 		mesh_data.map_colors.push_back(95.0f / 255);
 		mesh_data.map_colors.push_back(67.0f / 255);
 		mesh_data.map_colors.push_back(54.0f / 255);
-
+		
 
 		// normals
 		mesh_data.normals.push_back(mesh->mNormals[i].x);
@@ -108,29 +107,35 @@ void ObjImporter::processNode(aiNode* node, const aiScene* scene)
 			if (j == 0)
 			{
 				// diffuse
-				aiColor3D diffuse;
-				material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuse);
-				my_obj_data.material.diffuse = glm::vec3(diffuse.r, diffuse.g, diffuse.b);
+				aiColor3D color;
+				material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+				mesh_data.material.diffuse = glm::vec3(color.r, color.g, color.b);
 
 				// specular
-				aiColor3D specular;
-				material->Get(AI_MATKEY_SPECULAR_FACTOR, specular);
-				my_obj_data.material.specular = glm::vec3(specular.r, specular.g, specular.b);
+				material->Get(AI_MATKEY_COLOR_SPECULAR, color);
+				mesh_data.material.specular = glm::vec3(color.r, color.g, color.b);
+
+				// refract indice
+				float refract;
+				material->Get(AI_MATKEY_REFLECTIVITY, refract);
+				mesh_data.material.refract_indice = refract;
+
+				// reflective
+				material->Get(AI_MATKEY_COLOR_REFLECTIVE, color);
+				mesh_data.material.reflective = glm::vec3(color.r, color.g, color.b);
+
+				// ambiant
+				material->Get(AI_MATKEY_COLOR_AMBIENT, color);
+				mesh_data.material.ambiant = glm::vec3(color.r, color.g, color.b);
 
 				// shininess
 				float shininess;
-				material->Get(AI_MATKEY_SHININESS_STRENGTH, shininess);
-				my_obj_data.material.shininess = shininess;
-
-				// ambiant
-				aiColor3D ambiant;
-				material->Get(AI_MATKEY_COLOR_AMBIENT, ambiant);
-				my_obj_data.material.ambiant = glm::vec3(ambiant.r, ambiant.g, ambiant.b);
+				material->Get(AI_MATKEY_SHININESS, shininess);
+				mesh_data.material.shininess = shininess;
 
 				// color
-				aiColor3D color;
 				material->Get(AI_MATKEY_BASE_COLOR, color);
-				//my_obj_data.material.color = glm::vec3(color.r, color.g, color.b);
+				mesh_data.material.color = glm::vec3(color.r, color.g, color.b);
 				
 				// TODO récupérer la couleur du material
 			}
@@ -226,14 +231,14 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 	/* ****************************************** */
 
 	// bind the couleur
-	
+	/*
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
 	glBindVertexArray(color_buffer);
 	glBufferData(GL_ARRAY_BUFFER, mesh_data.map_colors.size() * sizeof(float), mesh_data.map_colors.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(1);
-	
+	*/
 	/* *********************** */
 
 
@@ -274,12 +279,7 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); // vertices
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer); // indices
 
-	// initialisation des donnnée Phong
-	my_obj_data.material.ambiant = glm::vec3(0.1f);
-	my_obj_data.material.shininess = 10.0f;
-	my_obj_data.material.diffuse = glm::vec3(0.2f, 0.3f, 0.2f);
-	my_obj_data.material.specular = glm::vec3(0.5f);
-
+	
 	/* transformation */
 
 	GLuint MatrixID = glGetUniformLocation(shaderProgram, "Model");
@@ -324,23 +324,31 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 
 	// ambient
 	MatrixID = glGetUniformLocation(shaderProgram, "material.ambient");
-	glUniform3f(MatrixID, my_obj_data.material.ambiant.x, my_obj_data.material.ambiant.y, my_obj_data.material.ambiant.z);
+	glUniform3f(MatrixID, mesh_data.material.ambiant.x, mesh_data.material.ambiant.y, mesh_data.material.ambiant.z);
 
 	// shininess
 	MatrixID = glGetUniformLocation(shaderProgram, "material.shininess");
-	glUniform1f(MatrixID, my_obj_data.material.shininess);
+	glUniform1f(MatrixID, mesh_data.material.shininess);
 
 	// specular
 	MatrixID = glGetUniformLocation(shaderProgram, "material.specular");
-	glUniform3f(MatrixID, my_obj_data.material.specular.x, my_obj_data.material.specular.y, my_obj_data.material.specular.z);
+	glUniform3f(MatrixID, mesh_data.material.specular.x, mesh_data.material.specular.y, mesh_data.material.specular.z);
 
 	// diffuse
 	MatrixID = glGetUniformLocation(shaderProgram, "material.diffuse");
-	glUniform3f(MatrixID, my_obj_data.material.diffuse.x, my_obj_data.material.diffuse.y, my_obj_data.material.diffuse.z);
+	glUniform3f(MatrixID, mesh_data.material.diffuse.x, mesh_data.material.diffuse.y, mesh_data.material.diffuse.z);
+
+	// reflective
+	MatrixID = glGetUniformLocation(shaderProgram, "material.reflective");
+	glUniform3f(MatrixID, mesh_data.material.reflective.x, mesh_data.material.reflective.y, mesh_data.material.reflective.z);
+
+	// reflectivity
+	MatrixID = glGetUniformLocation(shaderProgram, "material.refract_indice");
+	glUniform1f(MatrixID, mesh_data.material.refract_indice);
 
 	// color
-	//MatrixID = glGetUniformLocation(shaderProgram, "material.color");
-	//glUniform3f(MatrixID, my_obj_data.material.color.x, my_obj_data.material.color.y, my_obj_data.material.color.z);
+	MatrixID = glGetUniformLocation(shaderProgram, "material.color");
+	glUniform3f(MatrixID, mesh_data.material.color.x, mesh_data.material.color.y, mesh_data.material.color.z);
 	/* *********************  */
 
 

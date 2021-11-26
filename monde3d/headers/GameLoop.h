@@ -55,7 +55,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
     window = window_in;
     shaderProgram = shaderProgram_in;
 
-    ObjImporter importerAssimpTest("./Assets/cookie_modified.dae", 1.0f);
+    ObjImporter importerAssimpTest("./Assets/cube.dae", 1.0f);
     importerAssimpTest.prepare_to_draw(shaderProgram);
 
 
@@ -91,10 +91,11 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
          /*  transformations matrices */
 
         Misc::light_data lightdata;
-        glm::vec3 lightcolor = glm::vec3(1.0f);
-        lightdata.position = glm::vec3(0.0f, 500.0f, 100.0f);
+        glm::vec3 lightcolor = glm::vec3(249.f / 255, 215.f / 255, 28.f / 255);
+        lightdata.position = glm::vec3(0.f, 5.f, 0.f);
         lightdata.diffuse = lightcolor * glm::vec3(0.5f);
-        lightdata.ambient = lightdata.diffuse * glm::vec3(1.0f);
+        lightdata.ambient = lightcolor * glm::vec3(1.0f);
+        lightdata.specular = lightcolor * glm::vec3(1.0f);
 
 
         Projection = glm::perspective(glm::radians(45.0f), (1024.0f / 768.0f), 1.0f, 100.0f);
