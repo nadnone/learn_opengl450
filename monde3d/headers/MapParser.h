@@ -217,7 +217,7 @@ MapParser::MapParser(char* filename)
 
 	// initialisation des donnnée Phong
 	my_obj_data.material.ambiant = glm::vec3(0.1f);
-	my_obj_data.material.shininess = 32.0f;
+	my_obj_data.material.shininess = 3.2f;
 	my_obj_data.material.diffuse = glm::vec3(0.2f, 0.3f, 0.2f);
 	my_obj_data.material.specular = glm::vec3(0.001f);
 	my_obj_data.material.refract_indice = 1.0f;

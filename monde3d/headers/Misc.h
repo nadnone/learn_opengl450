@@ -16,15 +16,16 @@ public:
     void exitProgram(GLFWwindow *window);
 
     struct light_data {
-        glm::vec3 diffuse = glm::vec3(0.5f);
-        glm::vec3 ambient = glm::vec3(0.2f);
-        glm::vec3 specular = glm::vec3(1.0f);
-        glm::vec3 position = glm::vec3(0.0f, 5.0f, 0.0f);
+        glm::vec3 diffuse = glm::vec3(1.f);
+        glm::vec3 ambient = glm::vec3(1.f);
+        glm::vec3 specular = glm::vec3(1.f);
+        glm::vec3 position = glm::vec3(1.f);
     };
 
     struct Material_data {
         float shininess = 32.0f;
         float refract_indice = 0.0f;
+        float reflectivity = 0.0f;
         glm::vec3 reflective =glm::vec3(0.f);
         glm::vec3 ambiant = glm::vec3(0.f);
         glm::vec3 diffuse = glm::vec3(0.f);

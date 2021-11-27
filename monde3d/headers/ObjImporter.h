@@ -117,12 +117,13 @@ void ObjImporter::processNode(aiNode* node, const aiScene* scene)
 
 				// refract indice
 				float refract;
-				material->Get(AI_MATKEY_REFLECTIVITY, refract);
+				material->Get(AI_MATKEY_REFRACTI, refract);
 				mesh_data.material.refract_indice = refract;
 
-				// reflective
-				material->Get(AI_MATKEY_COLOR_REFLECTIVE, color);
-				mesh_data.material.reflective = glm::vec3(color.r, color.g, color.b);
+				// reflectivity
+				float reflectivity;
+				material->Get(AI_MATKEY_REFLECTIVITY, reflectivity);
+				mesh_data.material.reflectivity = reflectivity;
 
 				// ambiant
 				material->Get(AI_MATKEY_COLOR_AMBIENT, color);
@@ -339,8 +340,8 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	glUniform3f(MatrixID, mesh_data.material.diffuse.x, mesh_data.material.diffuse.y, mesh_data.material.diffuse.z);
 
 	// reflective
-	MatrixID = glGetUniformLocation(shaderProgram, "material.reflective");
-	glUniform3f(MatrixID, mesh_data.material.reflective.x, mesh_data.material.reflective.y, mesh_data.material.reflective.z);
+	MatrixID = glGetUniformLocation(shaderProgram, "material.reflectivity");
+	glUniform1f(MatrixID, mesh_data.material.reflectivity);
 
 	// reflectivity
 	MatrixID = glGetUniformLocation(shaderProgram, "material.refract_indice");

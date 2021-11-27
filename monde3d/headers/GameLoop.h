@@ -92,8 +92,8 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
 
         Misc::light_data lightdata;
         glm::vec3 lightcolor = glm::vec3(249.f / 255, 215.f / 255, 28.f / 255);
-        lightdata.position = glm::vec3(0.f, 5.f, 0.f);
-        lightdata.diffuse = lightcolor * glm::vec3(0.5f);
+        lightdata.position = glm::vec3(0.f, 200.f, 20.f);
+        lightdata.diffuse = lightcolor * glm::vec3(1.0f);
         lightdata.ambient = lightcolor * glm::vec3(1.0f);
         lightdata.specular = lightcolor * glm::vec3(1.0f);
 

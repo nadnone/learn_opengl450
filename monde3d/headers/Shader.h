@@ -65,6 +65,7 @@ Shader_Compilation::Shader_Compilation()
                 struct Material {
                     float shininess;
                     float refract_indice;
+                    float reflectivity;
 
                     vec3 ambient;
                     vec3 diffuse;
@@ -108,7 +109,7 @@ Shader_Compilation::Shader_Compilation()
                     vec3 R = refract(I, norm, 1/material.refract_indice);
 
                     float eyeReflectionAngle = max(dot(eyeNormal, R), 0.0f);
-                    float spec = pow(eyeReflectionAngle, material.shininess);
+                    float spec = pow(material.reflectivity + eyeReflectionAngle, material.shininess/10); 
 
                     vec3 specular = light.specular * spec * material.specular;
 
