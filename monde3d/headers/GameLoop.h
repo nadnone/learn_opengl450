@@ -23,16 +23,16 @@ class GameLoop
 public:
     GameLoop();
     ~GameLoop();
-    void run(GLFWwindow* window_in, unsigned int shaderProgram_in);
+    void run(GLFWwindow* window_in, unsigned shaderProgram_in);
 
 private:
 
     glm::mat4 Projection = glm::mat4(0.0f);
     glm::mat4 View = glm::mat4(0.0f);
 
-    unsigned int shaderProgram = 0;
+    unsigned shaderProgram = 0;
 
-    double lastmovementTime = 0;
+    float lastmovementTime = 0;
 
     mouse_keyboard camera_Pos_Angle;
 
@@ -50,12 +50,13 @@ GameLoop::~GameLoop()
 {
 }
 
-void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
+void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram_in)
 {
     window = window_in;
     shaderProgram = shaderProgram_in;
 
-    ObjImporter importerAssimpTest("./Assets/cube.dae", 1.0f);
+    // chargement du cube
+    ObjImporter importerAssimpTest("./Assets/cube.dae", "./Assets/textures/Cube_diffuse.png", 1.0f);
     importerAssimpTest.prepare_to_draw(shaderProgram);
 
 
@@ -63,13 +64,13 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
     Input_Event inputs(window);
 
     // initialisation de la map
-    MapParser map((char*)"./Assets/map/grayscale_heightmap.png");
+    MapParser map("./Assets/map/grayscale_heightmap.png");
     map.prepare_to_draw(shaderProgram);
+
+
     
     while (!glfwWindowShouldClose(window))
     {
-
-      
 
         /* Render here */
 
@@ -77,7 +78,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Limit movement time
-        double time = glfwGetTime();
+        float time = glfwGetTime();
 
         if ((time - lastmovementTime) >= MIN_FPS)
         {
@@ -92,7 +93,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned int shaderProgram_in)
 
         Misc::light_data lightdata;
         glm::vec3 lightcolor = glm::vec3(249.f / 255, 215.f / 255, 28.f / 255);
-        lightdata.position = glm::vec3(0.f, 200.f, 20.f);
+        lightdata.position = glm::vec3(0.f, 300.f, 20.f);
         lightdata.diffuse = lightcolor * glm::vec3(1.0f);
         lightdata.ambient = lightcolor * glm::vec3(1.0f);
         lightdata.specular = lightcolor * glm::vec3(1.0f);

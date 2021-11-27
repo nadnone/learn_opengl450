@@ -15,7 +15,7 @@
 class MapParser
 {
 public:
-	MapParser(char * filename);
+	MapParser(const char * filename);
 	~MapParser();
 	void draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::vec3 camPos);
 	void prepare_to_draw(unsigned int shaderProgram_in);
@@ -23,7 +23,7 @@ public:
 
 private:
 	Misc::obj_data my_obj_data;
-	unsigned int vbo = 0,
+	unsigned vbo = 0,
 		color_buffer = 0,
 		vao = 0,
 		shaderProgram = 0,
@@ -34,7 +34,7 @@ private:
 		COEFF_HAUTEUR = 10.0f;
 };
 
-MapParser::MapParser(char* filename)
+MapParser::MapParser(const char* filename)
 {
 	// gen vbo and vao
 	glGenBuffers(1, &vbo);
@@ -64,7 +64,6 @@ MapParser::MapParser(char* filename)
 	{
 		z.push_back((image[i] / 255.0f) * 4.0f);
 	}
-
 
 	for (int h = 0; h <= (int)height - 2; h++)
 	{
@@ -215,6 +214,7 @@ MapParser::MapParser(char* filename)
 
 	}
 
+
 	// initialisation des donnnée Phong
 	my_obj_data.material.ambiant = glm::vec3(0.1f);
 	my_obj_data.material.shininess = 3.2f;
@@ -223,8 +223,10 @@ MapParser::MapParser(char* filename)
 	my_obj_data.material.refract_indice = 1.0f;
 
 
+
+	image.clear();
 }
-void MapParser::prepare_to_draw(unsigned int shaderProgram_in) 
+void MapParser::prepare_to_draw(unsigned shaderProgram_in) 
 {
 	shaderProgram = shaderProgram_in;
 

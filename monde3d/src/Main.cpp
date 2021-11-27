@@ -54,6 +54,7 @@ int main(void)
 
     //glViewport(0, 0, 640, 480);
 
+
     // run the game loop
     GameLoop gameloop = GameLoop();
     gameloop.run(window, shaderProgram);

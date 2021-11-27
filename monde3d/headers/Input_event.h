@@ -25,10 +25,10 @@ public:
 	mouse_keyboard getMovement();
 private:
 
-	int forward = GLFW_KEY_W;
-	int backward = GLFW_KEY_S;
-	int right = GLFW_KEY_D;
-	int left = GLFW_KEY_A;
+	uint8_t forward = GLFW_KEY_W;
+	uint8_t backward = GLFW_KEY_S;
+	uint8_t right = GLFW_KEY_D;
+	uint8_t left = GLFW_KEY_A;
 
 	mouse_keyboard input_return;
 

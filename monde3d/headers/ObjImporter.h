@@ -3,25 +3,40 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <string.h>
+
 #include "Misc.h"
 #include "MapParser.h"
 
 class ObjImporter
 {
 public:
-	ObjImporter(const char * filename, float scale);
+	ObjImporter(std::string filename, std::string filename_texture_in, float scale);
 	~ObjImporter();
+
+
 	void draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::vec3 camPos, glm::mat4 Model_in);
-	void prepare_to_draw(unsigned int shaderProgram);
+	void prepare_to_draw(unsigned shaderProgram);
+
+
 	glm::mat4 translate(glm::vec3 translation_direction, glm::mat4 Model_in);
 	glm::mat4 rotate(float angle, glm::mat4 Model_in, glm::vec3 axe);
 
 private:
-	unsigned int vbo = 0,
-		color_buffer = 0,
+	std::string filename_texture;
+
+	unsigned vbo = 0,
+		texturecoord_buffer = 0,
+		texture = 0,
 		normals_buffer = 0,
 		vao = 0,
-		shaderProgram = 0;
+		shaderProgram = 0,
+		image_width = 0,
+		image_height = 0;
+
+
+	Misc::textures_array image_data_array;
+
 	glm::mat4 Model = glm::mat4(1.0f);
 	glm::mat4 ViewProjection = glm::mat4(0.0f);
 
@@ -59,30 +74,22 @@ void ObjImporter::processMesh(aiMesh *mesh, const aiScene* scene)
 		mesh_data.normals.push_back(mesh->mNormals[i].z);
 
 		// textures
+
 		if (mesh->mTextureCoords[0])
 		{
-			mesh_data.textures.push_back(mesh->mTextureCoords[0][1].x);
-			mesh_data.textures.push_back(mesh->mTextureCoords[0][1].y);
+			mesh_data.textures_coord.push_back(mesh->mTextureCoords[0][i].x);
+			mesh_data.textures_coord.push_back(mesh->mTextureCoords[0][i].y);
 		}
 		else
 		{
-			mesh_data.textures.push_back(0.0f);
-			mesh_data.textures.push_back(0.0f);
+			mesh_data.textures_coord.push_back(0.0f);
+			mesh_data.textures_coord.push_back(0.0f);
 		}
+	
+
+		
 
 
-	}
-
-
-	// process indices
-	for (unsigned i = 0; i < mesh->mNumFaces; i++)
-	{
-		aiFace face = mesh->mFaces[i];
-
-		for (unsigned j = 0; j < face.mNumIndices; j++)
-		{
-			mesh_data.map_indices.push_back(face.mIndices[j]);
-		}
 	}
 
 
@@ -133,10 +140,6 @@ void ObjImporter::processNode(aiNode* node, const aiScene* scene)
 				float shininess;
 				material->Get(AI_MATKEY_SHININESS, shininess);
 				mesh_data.material.shininess = shininess;
-
-				// color
-				material->Get(AI_MATKEY_BASE_COLOR, color);
-				mesh_data.material.color = glm::vec3(color.r, color.g, color.b);
 				
 				// TODO récupérer la couleur du material
 			}
@@ -153,16 +156,18 @@ void ObjImporter::processNode(aiNode* node, const aiScene* scene)
 
 }
 
-
-ObjImporter::ObjImporter(const char * filename, float scale)
+ObjImporter::ObjImporter(std::string filename, std::string filename_texture_in, float scale)
 {
 
 	coeff = scale;
 
-	// gen vbo and vao
+	filename_texture = filename_texture_in;
+
+	// generate objects buffers
 	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &color_buffer);
+	glGenBuffers(1, &texturecoord_buffer);
 	glGenBuffers(1, &normals_buffer);
+	glGenTextures(1, &texture);
 	//glGenBuffers(1, &indices_buffer);
 	glGenVertexArrays(1, &vao);
 
@@ -174,7 +179,7 @@ ObjImporter::ObjImporter(const char * filename, float scale)
 
 
 
-	if (!scene && !importer.GetErrorString() && !scene->mNumMeshes > 0)
+	if (!scene && !importer.GetErrorString() && !(scene->mNumMeshes > 0))
 	{
 		printf("Erreur importation: %s\n", importer.GetErrorString());
 		exit(1);
@@ -191,14 +196,15 @@ ObjImporter::ObjImporter(const char * filename, float scale)
 	//printf("%i\n", node->mNumChildren);
 
 	processNode(node, scene);
-	
-	
+
+
 
 
 }
 
 ObjImporter::~ObjImporter()
 {
+
 }
 
 void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
@@ -214,6 +220,34 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 
 
 
+	/*
+		TEXTURES
+	*/
+
+
+	std::vector<unsigned char> image_data;
+	unsigned error = lodepng::decode(image_data, image_width, image_height, filename_texture);
+
+	if (error)
+	{
+		printf("Error lodePNG objimporter: %u", error);
+	}
+
+	
+
+	// load image diffuse texture
+
+	for (unsigned i = 0; i < image_height; i++)
+	{
+		for (unsigned j = 0; j < image_width * 4; j++)
+		{
+				image_data_array.data[j][i] = image_data[j + (i * image_width * 4)];
+
+		}
+	}
+
+
+	/* ******************************** */
 
 
 	/*
@@ -231,16 +265,17 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 
 	/* ****************************************** */
 
-	// bind the couleur
-	/*
-	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
-	glBindVertexArray(color_buffer);
-	glBufferData(GL_ARRAY_BUFFER, mesh_data.map_colors.size() * sizeof(float), mesh_data.map_colors.data(), GL_STATIC_DRAW);
+	// bind the texture coordinates
+	glBindBuffer(GL_ARRAY_BUFFER, texturecoord_buffer);
+	glBindVertexArray(texturecoord_buffer);
+	glBufferData(GL_ARRAY_BUFFER, mesh_data.textures_coord.size() * sizeof(float), mesh_data.textures_coord.data(), GL_STATIC_DRAW);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-	*/
+
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(3);
 	/* *********************** */
+
+	// A REVOIR
 
 
 
@@ -278,7 +313,9 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	glUseProgram(shaderProgram);
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); // vertices
+	glBindTexture(GL_TEXTURE_2D, texture);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer); // indices
+
 
 	
 	/* transformation */
@@ -338,6 +375,17 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	// diffuse
 	MatrixID = glGetUniformLocation(shaderProgram, "material.diffuse");
 	glUniform3f(MatrixID, mesh_data.material.diffuse.x, mesh_data.material.diffuse.y, mesh_data.material.diffuse.z);
+	
+	
+	/* TEXTURE */
+
+	// texture
+	MatrixID = glGetUniformLocation(shaderProgram, "material.texture");
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_INT, image_data_array.data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	
+
+	/* ******************** */
 
 	// reflective
 	MatrixID = glGetUniformLocation(shaderProgram, "material.reflectivity");
@@ -347,10 +395,6 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	MatrixID = glGetUniformLocation(shaderProgram, "material.refract_indice");
 	glUniform1f(MatrixID, mesh_data.material.refract_indice);
 
-	// color
-	MatrixID = glGetUniformLocation(shaderProgram, "material.color");
-	glUniform3f(MatrixID, mesh_data.material.color.x, mesh_data.material.color.y, mesh_data.material.color.z);
-	/* *********************  */
 
 
 	//draw

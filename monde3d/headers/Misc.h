@@ -34,13 +34,14 @@ public:
     };
     struct obj_data {
         std::vector<float> map_vertices;
-        std::vector<unsigned int> map_indices;
         std::vector<float> map_colors;
-        std::vector<float> textures;
+        std::vector<float> textures_coord;
         std::vector<float> normals;
         Material_data material;
     };
-
+    struct textures_array {
+        unsigned data[64*4][64];
+    };
 private:
 
 };
