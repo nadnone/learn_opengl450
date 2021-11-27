@@ -92,11 +92,13 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram_in)
          /*  transformations matrices */
 
         Misc::light_data lightdata;
-        glm::vec3 lightcolor = glm::vec3(249.f / 255, 215.f / 255, 28.f / 255);
-        lightdata.position = glm::vec3(0.f, 300.f, 20.f);
-        lightdata.diffuse = lightcolor * glm::vec3(1.0f);
-        lightdata.ambient = lightcolor * glm::vec3(1.0f);
-        lightdata.specular = lightcolor * glm::vec3(1.0f);
+        glm::vec3 lightcolor = glm::vec3(.8f, .5f, .3f);
+        lightdata.ambient = lightcolor * lightdata.ambient;
+        lightdata.diffuse = lightcolor * lightdata.diffuse;
+        lightdata.specular = lightcolor * lightdata.specular;
+
+        lightdata.position = glm::vec3(0.f, 500.f, 0.f);
+
 
 
         Projection = glm::perspective(glm::radians(45.0f), (1024.0f / 768.0f), 1.0f, 100.0f);

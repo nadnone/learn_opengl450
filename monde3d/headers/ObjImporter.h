@@ -27,15 +27,13 @@ private:
 
 	unsigned vbo = 0,
 		texturecoord_buffer = 0,
-		texture = 0,
+		texture_buffer = 0,
 		normals_buffer = 0,
 		vao = 0,
 		shaderProgram = 0,
 		image_width = 0,
 		image_height = 0;
 
-
-	Misc::textures_array image_data_array;
 
 	glm::mat4 Model = glm::mat4(1.0f);
 	glm::mat4 ViewProjection = glm::mat4(0.0f);
@@ -167,7 +165,6 @@ ObjImporter::ObjImporter(std::string filename, std::string filename_texture_in, 
 	glGenBuffers(1, &vbo);
 	glGenBuffers(1, &texturecoord_buffer);
 	glGenBuffers(1, &normals_buffer);
-	glGenTextures(1, &texture);
 	//glGenBuffers(1, &indices_buffer);
 	glGenVertexArrays(1, &vao);
 
@@ -204,7 +201,11 @@ ObjImporter::ObjImporter(std::string filename, std::string filename_texture_in, 
 
 ObjImporter::~ObjImporter()
 {
-
+	glDeleteTextures(1, &texture_buffer);
+	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &texturecoord_buffer);
+	glDeleteBuffers(1, &normals_buffer);
+	glDeleteBuffers(1, &vao);
 }
 
 void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
@@ -235,14 +236,17 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 
 	
 
-	// load image diffuse texture
+	// load image texture
 
-	for (unsigned i = 0; i < image_height; i++)
+	for (unsigned h = 0; h < image_height; h++)
 	{
-		for (unsigned j = 0; j < image_width * 4; j++)
+		for (unsigned w = 0; w < image_width; w++)
 		{
-				image_data_array.data[j][i] = image_data[j + (i * image_width * 4)];
+			for (unsigned i = 0; i < 4; i++)
+			{
+				mesh_data.material.texture.data[w * 4 + i][h] = image_data[w * 4 + i + (h * image_width * 4)];
 
+			}
 		}
 	}
 
@@ -264,16 +268,32 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 	glEnableVertexAttribArray(0);
 
 	/* ****************************************** */
+	
+	
+	/* TEXTURE */
 
 	// bind the texture coordinates
-	glBindBuffer(GL_ARRAY_BUFFER, texturecoord_buffer);
+	glBindBuffer(GL_TEXTURE_COORD_ARRAY, texturecoord_buffer);
 	glBindVertexArray(texturecoord_buffer);
-	glBufferData(GL_ARRAY_BUFFER, mesh_data.textures_coord.size() * sizeof(float), mesh_data.textures_coord.data(), GL_STATIC_DRAW);
-
+	glBufferData(GL_TEXTURE_COORD_ARRAY, mesh_data.textures_coord.size() * sizeof(float), mesh_data.textures_coord.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(3);
-	/* *********************** */
+
+
+	// Texture
+
+	glGenTextures(1, &texture_buffer);
+	glBindTexture(GL_TEXTURE_2D, texture_buffer);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_INT, mesh_data.material.texture.data);
+
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	/* ******************** */
 
 	// A REVOIR
 
@@ -313,8 +333,7 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	glUseProgram(shaderProgram);
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); // vertices
-	glBindTexture(GL_TEXTURE_2D, texture);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer); // indices
+	glBindTexture(GL_TEXTURE_2D, texture_buffer);
 
 
 	
@@ -336,16 +355,11 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	glUniform3f(MatrixID, camPos.x, camPos.y, camPos.z);
 
 
-
 	/* LUMIERE */
 
 	// diffuse
 	MatrixID = glGetUniformLocation(shaderProgram, "light.diffuse");
 	glUniform3f(MatrixID, light.diffuse.x, light.diffuse.y, light.diffuse.z);
-
-	// ambient
-	MatrixID = glGetUniformLocation(shaderProgram, "light.ambient");
-	glUniform3f(MatrixID, light.ambient.x, light.ambient.y, light.ambient.z);
 
 	// specular
 	MatrixID = glGetUniformLocation(shaderProgram, "light.specular");
@@ -377,15 +391,7 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	glUniform3f(MatrixID, mesh_data.material.diffuse.x, mesh_data.material.diffuse.y, mesh_data.material.diffuse.z);
 	
 	
-	/* TEXTURE */
 
-	// texture
-	MatrixID = glGetUniformLocation(shaderProgram, "material.texture");
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_INT, image_data_array.data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	
-
-	/* ******************** */
 
 	// reflective
 	MatrixID = glGetUniformLocation(shaderProgram, "material.reflectivity");
@@ -400,6 +406,8 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	//draw
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)mesh_data.map_vertices.size() / 3);
 	//glDrawElements(GL_TRIANGLES, my_map_data.map_indices.size(), GL_UNSIGNED_INT, (void*)0);
+
+	
 
 }
 glm::mat4 ObjImporter::translate(glm::vec3 translation_direction, glm::mat4 Model_in)

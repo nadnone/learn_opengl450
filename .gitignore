@@ -370,3 +370,4 @@ monde3d/src/glad.c
 monde3d/src/lodepng.cpp
 monde3d/Assets/cookie.dae
 *.dae
+monde3d/Assets/textures/TextureCookie.png

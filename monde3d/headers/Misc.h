@@ -17,9 +17,12 @@ public:
 
     struct light_data {
         glm::vec3 diffuse = glm::vec3(1.f);
-        glm::vec3 ambient = glm::vec3(1.f);
-        glm::vec3 specular = glm::vec3(1.f);
+        glm::vec3 ambient = glm::vec3(.1f);
+        glm::vec3 specular = glm::vec3(.5f);
         glm::vec3 position = glm::vec3(1.f);
+    };
+    struct textures_array {
+        GLuint data[64 * 4][64];
     };
 
     struct Material_data {
@@ -31,17 +34,18 @@ public:
         glm::vec3 diffuse = glm::vec3(0.f);
         glm::vec3 specular = glm::vec3(0.f);
         glm::vec3 color = glm::vec3(0.f);
+        textures_array texture;
     };
+
     struct obj_data {
         std::vector<float> map_vertices;
         std::vector<float> map_colors;
         std::vector<float> textures_coord;
         std::vector<float> normals;
+       
         Material_data material;
     };
-    struct textures_array {
-        unsigned data[64*4][64];
-    };
+
 private:
 
 };

@@ -216,11 +216,11 @@ MapParser::MapParser(const char* filename)
 
 
 	// initialisation des donnnée Phong
-	my_obj_data.material.ambiant = glm::vec3(0.1f);
+	my_obj_data.material.ambiant = glm::vec3(.1f);
 	my_obj_data.material.shininess = 3.2f;
-	my_obj_data.material.diffuse = glm::vec3(0.2f, 0.3f, 0.2f);
-	my_obj_data.material.specular = glm::vec3(0.001f);
-	my_obj_data.material.refract_indice = 1.0f;
+	my_obj_data.material.diffuse = glm::vec3(1.f);
+	my_obj_data.material.specular = glm::vec3(.5f);
+	my_obj_data.material.refract_indice = 1.42f;
 
 
 
@@ -254,7 +254,7 @@ void MapParser::prepare_to_draw(unsigned shaderProgram_in)
 
 	/* ****************************************** */
 
-	// bind the couelur
+	// bind the colors
 
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer);
 	glBindVertexArray(color_buffer);
@@ -321,10 +321,6 @@ void MapParser::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::v
 	// diffuse
 	MatrixID = glGetUniformLocation(shaderProgram, "light.diffuse");
 	glUniform3f(MatrixID, light.diffuse.x, light.diffuse.y, light.diffuse.z);
-
-	// ambient
-	MatrixID = glGetUniformLocation(shaderProgram, "light.ambient");
-	glUniform3f(MatrixID, light.ambient.x, light.ambient.y, light.ambient.z);
 
 	// specular
 	MatrixID = glGetUniformLocation(shaderProgram, "light.specular");

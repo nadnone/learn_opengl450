@@ -44,7 +44,9 @@ Shader_Compilation::Shader_Compilation()
                 {
                     gl_Position = ViewProjection * Model * vec4(modelPos, 1.0f);
                     vertexNormals = normalsDataIn;
+
                     fragPos = vec3(Model * vec4(modelPos, 1.0f));
+
                     colorsVertex = colorDataIn;
                     textCoords = textCoordsIn;
                 }
@@ -78,33 +80,34 @@ Shader_Compilation::Shader_Compilation()
                     vec3 specular;
 
                     sampler2D texture;
+
                 };
                 uniform Material material;
 
                 struct Light {
-                    vec3 ambient;
                     vec3 diffuse;
                     vec3 specular;
                     vec3 position;
+                    vec3 ambient;
                 };
                 uniform Light light;               
             
                 void main()
                 {
+                    // texture
+                    vec3 texture_color = vec3(texture(material.texture, textCoords));
+                    
                     // AMBIENT
-
+                    
                     vec3 ambient = light.ambient * material.ambient;
                     
                     /* ******************* */                    
-
-
-                    vec3 norm = normalize(vertexNormals);
-                    vec3 lightDir = normalize(light.position - fragPos);
-                    vec3 eyeNormal = normalize(eyePos - fragPos);
-                    vec3 halfWayDir = normalize(lightDir + eyeNormal);
+                    
                     
                     // DIFFUSE
 
+                    vec3 norm = normalize(vertexNormals);
+                    vec3 lightDir = normalize(light.position - fragPos);
                     float diffuseDot = max( 0.0f, dot( norm, lightDir ) );            
                     vec3 diffuse = light.diffuse * diffuseDot * material.diffuse;
 
@@ -112,15 +115,19 @@ Shader_Compilation::Shader_Compilation()
 
 
                     // SPECULAR
-                    float eyeReflectionAngle = max(dot(norm, halfWayDir), 0.0f);
-                    float spec = pow(eyeReflectionAngle, material.shininess); 
 
+                    vec3 eyeNormal = normalize(fragPos - eyePos);
+                    vec3 I = normalize(norm - eyeNormal);
+                    vec3 R = refract(I, norm, 1/material.refract_indice);
+
+                    float eyeReflectionAngle = max(dot(eyeNormal, R), 0.0f);
+                    float spec = pow(material.reflectivity + eyeReflectionAngle, material.shininess); 
                     vec3 specular = light.specular * spec * material.specular;
 
                     /* ******************** */
 
                     // result
-                    vec3 result = (ambient + diffuse + specular) + colorsVertex;
+                    vec3 result = (ambient + diffuse + specular) + (colorsVertex + texture_color);
 	                FragColor = vec4(result, 1.0f);
                 }
         )glsl";
