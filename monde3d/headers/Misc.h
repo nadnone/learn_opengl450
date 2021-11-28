@@ -8,6 +8,40 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+
+struct light_data {
+    glm::vec3 diffuse = glm::vec3(1.f);
+    glm::vec3 ambient = glm::vec3(.1f);
+    glm::vec3 specular = glm::vec3(.5f);
+    glm::vec3 position = glm::vec3(1.f);
+};
+struct textures_array {
+    uint8_t data[64][64 * 4];
+};
+
+struct Material_data {
+    float shininess = 32.0f;
+    float refract_indice = 0.0f;
+    float reflectivity = 0.0f;
+    glm::vec3 reflective = glm::vec3(0.f);
+    glm::vec3 ambiant = glm::vec3(0.f);
+    glm::vec3 diffuse = glm::vec3(0.f);
+    glm::vec3 specular = glm::vec3(0.f);
+    glm::vec3 color = glm::vec3(0.f);
+    textures_array texture;
+};
+
+struct obj_data {
+    std::vector<float> map_vertices = std::vector<float>(NULL);
+    std::vector<float> map_colors = std::vector<float>(NULL);
+    std::vector<float> textures_coord =  std::vector<float>(NULL);
+    std::vector<float> normals = std::vector<float>(NULL);
+
+    Material_data material;
+};
+
+
+
 class Misc
 {
 public:
@@ -15,36 +49,7 @@ public:
 	~Misc();
     void exitProgram(GLFWwindow *window);
 
-    struct light_data {
-        glm::vec3 diffuse = glm::vec3(1.f);
-        glm::vec3 ambient = glm::vec3(.1f);
-        glm::vec3 specular = glm::vec3(.5f);
-        glm::vec3 position = glm::vec3(1.f);
-    };
-    struct textures_array {
-        GLuint data[64 * 4][64];
-    };
 
-    struct Material_data {
-        float shininess = 32.0f;
-        float refract_indice = 0.0f;
-        float reflectivity = 0.0f;
-        glm::vec3 reflective =glm::vec3(0.f);
-        glm::vec3 ambiant = glm::vec3(0.f);
-        glm::vec3 diffuse = glm::vec3(0.f);
-        glm::vec3 specular = glm::vec3(0.f);
-        glm::vec3 color = glm::vec3(0.f);
-        textures_array texture;
-    };
-
-    struct obj_data {
-        std::vector<float> map_vertices;
-        std::vector<float> map_colors;
-        std::vector<float> textures_coord;
-        std::vector<float> normals;
-       
-        Material_data material;
-    };
 
 private:
 

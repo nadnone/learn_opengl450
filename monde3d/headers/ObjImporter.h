@@ -15,7 +15,7 @@ public:
 	~ObjImporter();
 
 
-	void draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::vec3 camPos, glm::mat4 Model_in);
+	void draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 camPos, glm::mat4 Model_in);
 	void prepare_to_draw(unsigned shaderProgram);
 
 
@@ -38,7 +38,7 @@ private:
 	glm::mat4 Model = glm::mat4(1.0f);
 	glm::mat4 ViewProjection = glm::mat4(0.0f);
 
-	Misc::obj_data mesh_data;
+	obj_data mesh_data;
 	float coeff = 1.0f,
 		shininess = 32.0f;
 
@@ -57,14 +57,7 @@ void ObjImporter::processMesh(aiMesh *mesh, const aiScene* scene)
 		// vertices 
 		mesh_data.map_vertices.push_back(mesh->mVertices[i].x * coeff);
 		mesh_data.map_vertices.push_back(mesh->mVertices[i].z * coeff);
-		mesh_data.map_vertices.push_back(mesh->mVertices[i].y * coeff);
-
-		// couleur 
-		
-		mesh_data.map_colors.push_back(95.0f / 255);
-		mesh_data.map_colors.push_back(67.0f / 255);
-		mesh_data.map_colors.push_back(54.0f / 255);
-		
+		mesh_data.map_vertices.push_back(mesh->mVertices[i].y * coeff);		
 
 		// normals
 		mesh_data.normals.push_back(mesh->mNormals[i].x);
@@ -72,7 +65,6 @@ void ObjImporter::processMesh(aiMesh *mesh, const aiScene* scene)
 		mesh_data.normals.push_back(mesh->mNormals[i].z);
 
 		// textures
-
 		if (mesh->mTextureCoords[0])
 		{
 			mesh_data.textures_coord.push_back(mesh->mTextureCoords[0][i].x);
@@ -139,7 +131,6 @@ void ObjImporter::processNode(aiNode* node, const aiScene* scene)
 				material->Get(AI_MATKEY_SHININESS, shininess);
 				mesh_data.material.shininess = shininess;
 				
-				// TODO récupérer la couleur du material
 			}
 
 			processMesh(mesh, scene);
@@ -163,10 +154,14 @@ ObjImporter::ObjImporter(std::string filename, std::string filename_texture_in, 
 
 	// generate objects buffers
 	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &texturecoord_buffer);
 	glGenBuffers(1, &normals_buffer);
 	//glGenBuffers(1, &indices_buffer);
 	glGenVertexArrays(1, &vao);
+	glGenVertexArrays(1, &texturecoord_buffer);
+	glGenTextures(1, &texture_buffer); 
+
+
+
 
 
 	Assimp::Importer importer;
@@ -212,21 +207,12 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 {
 
 
-	shaderProgram = shaderProgram_in;
-
-	glUseProgram(shaderProgram);
-
-	// bind the vao
-	glBindVertexArray(vao);
-
-
-
 	/*
 		TEXTURES
 	*/
 
 
-	std::vector<unsigned char> image_data;
+	std::vector<uint8_t> image_data;
 	unsigned error = lodepng::decode(image_data, image_width, image_height, filename_texture);
 
 	if (error)
@@ -242,24 +228,32 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 	{
 		for (unsigned w = 0; w < image_width; w++)
 		{
-			for (unsigned i = 0; i < 4; i++)
+			for (uint8_t i = 0; i < 4; i++)
 			{
-				mesh_data.material.texture.data[w * 4 + i][h] = image_data[w * 4 + i + (h * image_width * 4)];
+				mesh_data.material.texture.data[h][(w * 4) + i] = image_data[((w * 4) + i) + (h * image_width * 4)];
 
 			}
 		}
 	}
 
-
+	image_data.clear();
 	/* ******************************** */
 
 
 	/*
 		Shader Program
 	*/
+	shaderProgram = shaderProgram_in;
 
+	glUseProgram(shaderProgram);
+
+	// bind the vao
+	glBindVertexArray(vao);
 	// bind the VBO 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+
+
 	// bind des vertices
 	glBufferData(GL_ARRAY_BUFFER, mesh_data.map_vertices.size() * sizeof(float), mesh_data.map_vertices.data(), GL_STATIC_DRAW);
 
@@ -268,34 +262,33 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 	glEnableVertexAttribArray(0);
 
 	/* ****************************************** */
-	
+
 	
 	/* TEXTURE */
 
 	// bind the texture coordinates
-	glBindBuffer(GL_TEXTURE_COORD_ARRAY, texturecoord_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, texturecoord_buffer);
 	glBindVertexArray(texturecoord_buffer);
-	glBufferData(GL_TEXTURE_COORD_ARRAY, mesh_data.textures_coord.size() * sizeof(float), mesh_data.textures_coord.data(), GL_STATIC_DRAW);
+
+	glBufferData(GL_ARRAY_BUFFER, mesh_data.textures_coord.size() * sizeof(float), mesh_data.textures_coord.data(), GL_STATIC_DRAW);
 
 	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(3);
 
 
 	// Texture
+	glActiveTexture(GL_TEXTURE0);
 
-	glGenTextures(1, &texture_buffer);
 	glBindTexture(GL_TEXTURE_2D, texture_buffer);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_INT, mesh_data.material.texture.data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, mesh_data.material.texture.data);
 
-	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 	glGenerateMipmap(GL_TEXTURE_2D);
-
+	
 	/* ******************** */
-
-	// A REVOIR
 
 
 
@@ -312,6 +305,7 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 
 
 
+
 	// bind indices
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer);
 	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, my_map_data.map_indices.size() * sizeof(unsigned int), my_map_data.map_indices.data(), GL_STATIC_DRAW);
@@ -324,50 +318,63 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 
 }
 
-void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::vec3 camPos, glm::mat4 Model_in)
+void ObjImporter::draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 camPos, glm::mat4 Model_in)
 {
+	glUseProgram(shaderProgram);
 
 	Model = Model_in;
 	ViewProjection = ViewProjection_in;
-	
-	glUseProgram(shaderProgram);
+
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); // vertices
-	glBindTexture(GL_TEXTURE_2D, texture_buffer);
 
 
-	
+
 	/* transformation */
 
-	GLuint MatrixID = glGetUniformLocation(shaderProgram, "Model");
+	GLuint uniLoc = glGetUniformLocation(shaderProgram, "Model");
 
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(Model));
+	glUniformMatrix4fv(uniLoc, 1, GL_FALSE, glm::value_ptr(Model));
 
-	MatrixID = glGetUniformLocation(shaderProgram, "ViewProjection");
+	uniLoc = glGetUniformLocation(shaderProgram, "ViewProjection");
 
-	glUniformMatrix4fv(MatrixID, 1, GL_FALSE, glm::value_ptr(ViewProjection));
+	glUniformMatrix4fv(uniLoc, 1, GL_FALSE, glm::value_ptr(ViewProjection));
 
 	/* *********************  */
 
 
 	// eye normal
-	MatrixID = glGetUniformLocation(shaderProgram, "eyePos");
-	glUniform3f(MatrixID, camPos.x, camPos.y, camPos.z);
+	uniLoc = glGetUniformLocation(shaderProgram, "eyePos");
+	glUniform3f(uniLoc, camPos.x, camPos.y, camPos.z);
+
+
+
+
+	/* TEXTURE */
+
+	uniLoc = glGetUniformLocation(shaderProgram, "texture0");
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture_buffer);
+
+	glUniform1i(uniLoc, GL_TEXTURE0);
+
 
 
 	/* LUMIERE */
 
+
 	// diffuse
-	MatrixID = glGetUniformLocation(shaderProgram, "light.diffuse");
-	glUniform3f(MatrixID, light.diffuse.x, light.diffuse.y, light.diffuse.z);
+	uniLoc = glGetUniformLocation(shaderProgram, "light.diffuse");
+	glUniform3f(uniLoc, light.diffuse.x, light.diffuse.y, light.diffuse.z);
 
 	// specular
-	MatrixID = glGetUniformLocation(shaderProgram, "light.specular");
-	glUniform3f(MatrixID, light.specular.x, light.specular.y, light.specular.z);
+	uniLoc = glGetUniformLocation(shaderProgram, "light.specular");
+	glUniform3f(uniLoc, light.specular.x, light.specular.y, light.specular.z);
 
 	// position
-	MatrixID = glGetUniformLocation(shaderProgram, "light.position");
-	glUniform3f(MatrixID, light.position.x, light.position.y, light.position.z);
+	uniLoc = glGetUniformLocation(shaderProgram, "light.position");
+	glUniform3f(uniLoc, light.position.x, light.position.y, light.position.z);
 
 	/* ********************** */
 
@@ -375,31 +382,31 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	/* PHONG */
 
 	// ambient
-	MatrixID = glGetUniformLocation(shaderProgram, "material.ambient");
-	glUniform3f(MatrixID, mesh_data.material.ambiant.x, mesh_data.material.ambiant.y, mesh_data.material.ambiant.z);
+	uniLoc = glGetUniformLocation(shaderProgram, "material.ambient");
+	glUniform3f(uniLoc, mesh_data.material.ambiant.x, mesh_data.material.ambiant.y, mesh_data.material.ambiant.z);
 
 	// shininess
-	MatrixID = glGetUniformLocation(shaderProgram, "material.shininess");
-	glUniform1f(MatrixID, mesh_data.material.shininess);
+	uniLoc = glGetUniformLocation(shaderProgram, "material.shininess");
+	glUniform1f(uniLoc, mesh_data.material.shininess);
 
 	// specular
-	MatrixID = glGetUniformLocation(shaderProgram, "material.specular");
-	glUniform3f(MatrixID, mesh_data.material.specular.x, mesh_data.material.specular.y, mesh_data.material.specular.z);
+	uniLoc = glGetUniformLocation(shaderProgram, "material.specular");
+	glUniform3f(uniLoc, mesh_data.material.specular.x, mesh_data.material.specular.y, mesh_data.material.specular.z);
 
 	// diffuse
-	MatrixID = glGetUniformLocation(shaderProgram, "material.diffuse");
-	glUniform3f(MatrixID, mesh_data.material.diffuse.x, mesh_data.material.diffuse.y, mesh_data.material.diffuse.z);
+	uniLoc = glGetUniformLocation(shaderProgram, "material.diffuse");
+	glUniform3f(uniLoc, mesh_data.material.diffuse.x, mesh_data.material.diffuse.y, mesh_data.material.diffuse.z);
 	
 	
 
 
 	// reflective
-	MatrixID = glGetUniformLocation(shaderProgram, "material.reflectivity");
-	glUniform1f(MatrixID, mesh_data.material.reflectivity);
+	uniLoc = glGetUniformLocation(shaderProgram, "material.reflectivity");
+	glUniform1f(uniLoc, mesh_data.material.reflectivity);
 
 	// reflectivity
-	MatrixID = glGetUniformLocation(shaderProgram, "material.refract_indice");
-	glUniform1f(MatrixID, mesh_data.material.refract_indice);
+	uniLoc = glGetUniformLocation(shaderProgram, "material.refract_indice");
+	glUniform1f(uniLoc, mesh_data.material.refract_indice);
 
 
 
@@ -408,6 +415,8 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm:
 	//glDrawElements(GL_TRIANGLES, my_map_data.map_indices.size(), GL_UNSIGNED_INT, (void*)0);
 
 	
+	// unbind la texture
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 }
 glm::mat4 ObjImporter::translate(glm::vec3 translation_direction, glm::mat4 Model_in)

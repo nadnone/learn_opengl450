@@ -74,15 +74,16 @@ Shader_Compilation::Shader_Compilation()
                     float reflectivity;
 
                     vec3 ambient;
- 
                     vec3 reflective;
                     vec3 diffuse;
                     vec3 specular;
-
-                    sampler2D texture;
-
                 };
                 uniform Material material;
+
+                
+                uniform sampler2D texture0;
+                
+
 
                 struct Light {
                     vec3 diffuse;
@@ -95,7 +96,7 @@ Shader_Compilation::Shader_Compilation()
                 void main()
                 {
                     // texture
-                    vec3 texture_color = vec3(texture(material.texture, textCoords));
+                    vec3 texture_color = vec3(texture(texture0, textCoords));
                     
                     // AMBIENT
                     
@@ -133,6 +134,7 @@ Shader_Compilation::Shader_Compilation()
         )glsl";
         
     // TODO Comprendre le lighting 
+    // TODO PHONG model for textures
 
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -146,13 +148,6 @@ Shader_Compilation::Shader_Compilation()
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
     if (isCompiled == GL_FALSE)
     {
-        GLint maxLength = 0;
-        glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-        // The maxLength includes the NULL character
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(fragmentShader, maxLength, &maxLength, &errorLog[0]);
-
         // Exit with failure.
         glDeleteShader(fragmentShader); // Don't leak the shader.
         printf("FragmentShader Error\n");
@@ -162,13 +157,6 @@ Shader_Compilation::Shader_Compilation()
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
     if (isCompiled == GL_FALSE)
     {
-        GLint maxLength = 0;
-        glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &maxLength);
-
-        // The maxLength includes the NULL character
-        std::vector<GLchar> errorLog(maxLength);
-        glGetShaderInfoLog(vertexShader, maxLength, &maxLength, &errorLog[0]);
-
         // Exit with failure.
         glDeleteShader(vertexShader); // Don't leak the shader.
         printf("VertexShader Error\n");

@@ -42,13 +42,11 @@ int main(void)
     // depth testing
     glEnable(GL_DEPTH_TEST);
 
-    
 
     
     //Get the shader program id
     Shader_Compilation shader_compiler = Shader_Compilation();
     unsigned int shaderProgram = shader_compiler.getShaderProgramID();
-
 
 
 

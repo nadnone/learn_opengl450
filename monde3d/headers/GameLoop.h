@@ -56,11 +56,11 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram_in)
     shaderProgram = shaderProgram_in;
 
     // chargement du cube
-    ObjImporter importerAssimpTest("./Assets/cube.dae", "./Assets/textures/Cube_diffuse.png", 1.0f);
+    ObjImporter importerAssimpTest("./Assets/cookie.dae", "./Assets/textures/TextureCookie.png", 1.f);
     importerAssimpTest.prepare_to_draw(shaderProgram);
 
 
-    // initialisation des Events Claviers
+    // initialisation des events Claviers
     Input_Event inputs(window);
 
     // initialisation de la map
@@ -68,11 +68,11 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram_in)
     map.prepare_to_draw(shaderProgram);
 
 
-    
     while (!glfwWindowShouldClose(window))
     {
 
         /* Render here */
+
 
         // clear buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -91,7 +91,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram_in)
         
          /*  transformations matrices */
 
-        Misc::light_data lightdata;
+        light_data lightdata;
         glm::vec3 lightcolor = glm::vec3(.8f, .5f, .3f);
         lightdata.ambient = lightcolor * lightdata.ambient;
         lightdata.diffuse = lightcolor * lightdata.diffuse;
@@ -118,13 +118,12 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram_in)
 
 
         map.draw(Projection * View, lightdata, cam_eye);
-
         
         glm::mat4 Model = importerAssimpTest.translate(glm::vec3(17.0f, 2.0f, -27.0f), glm::mat4(1.0f));
         //Model = importerAssimpTest.rotate(45.0f * 3.1415 / 180, Model, glm::vec3(1, 0, 0));
    
         importerAssimpTest.draw(Projection * View, lightdata, cam_eye, Model);
-
+ 
         //Model = sphere_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
         //Model = sphere_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));
         //sphere_2.draw(shaderProgram, Projection * View);

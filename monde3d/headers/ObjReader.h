@@ -26,7 +26,7 @@ public:
 private:
 	std::vector<glm::vec3> data_vertices_coord;
 	std::vector<std::vector<std::vector<int>>> faces_data;
-	Misc::obj_data my_map_data;
+	obj_data my_map_data;
 	unsigned int vbo, color_buffer, vao, indices_buffer;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;

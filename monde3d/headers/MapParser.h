@@ -17,12 +17,12 @@ class MapParser
 public:
 	MapParser(const char * filename);
 	~MapParser();
-	void draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::vec3 camPos);
+	void draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 camPos);
 	void prepare_to_draw(unsigned int shaderProgram_in);
 
 
 private:
-	Misc::obj_data my_obj_data;
+	obj_data my_obj_data;
 	unsigned vbo = 0,
 		color_buffer = 0,
 		vao = 0,
@@ -230,7 +230,6 @@ void MapParser::prepare_to_draw(unsigned shaderProgram_in)
 {
 	shaderProgram = shaderProgram_in;
 
-	glUseProgram(shaderProgram);
 
 	// bind the vao
 	glBindVertexArray(vao);
@@ -253,6 +252,7 @@ void MapParser::prepare_to_draw(unsigned shaderProgram_in)
 	glEnableVertexAttribArray(0);
 
 	/* ****************************************** */
+
 
 	// bind the colors
 
@@ -283,19 +283,19 @@ void MapParser::prepare_to_draw(unsigned shaderProgram_in)
 
 
 
+
 }
 
-void MapParser::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::vec3 camPos)
+void MapParser::draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 camPos)
 {
 
+	glUseProgram(shaderProgram);
 
 	ViewProjection = ViewProjection_in;
 
-	glUseProgram(shaderProgram);
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); // vertices
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_buffer); // indices
-
 
 
 	/* transformation */
@@ -362,4 +362,7 @@ void MapParser::draw(glm::mat4 ViewProjection_in, Misc::light_data light, glm::v
 
 MapParser::~MapParser()
 {
+	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &normals_buffer);
+	glDeleteBuffers(1, &vao);
 }
