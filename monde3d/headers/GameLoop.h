@@ -23,14 +23,12 @@ class GameLoop
 public:
     GameLoop();
     ~GameLoop();
-    void run(GLFWwindow* window_in, unsigned shaderProgram_in);
+    void run(GLFWwindow* window_in, unsigned shaderProgram_in[2]);
 
 private:
 
     glm::mat4 Projection = glm::mat4(0.0f);
     glm::mat4 View = glm::mat4(0.0f);
-
-    unsigned shaderProgram = 0;
 
     float lastmovementTime = 0;
 
@@ -50,22 +48,20 @@ GameLoop::~GameLoop()
 {
 }
 
-void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram_in)
+void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
 {
     window = window_in;
-    shaderProgram = shaderProgram_in;
 
     // chargement du cube
-    ObjImporter importerAssimpTest("./Assets/cookie.dae", "./Assets/textures/TextureCookie.png", 1.f);
-    importerAssimpTest.prepare_to_draw(shaderProgram);
-
-
+    ObjImporter importerAssimpTest("./Assets/cube.dae", "./Assets/textures/cube_texture.png", 1.f);
+    importerAssimpTest.prepare_to_draw(shaderProgram[0]);
+    
     // initialisation des events Claviers
     Input_Event inputs(window);
 
     // initialisation de la map
     MapParser map("./Assets/map/grayscale_heightmap.png");
-    map.prepare_to_draw(shaderProgram);
+    map.prepare_to_draw(shaderProgram[1]);
 
 
     while (!glfwWindowShouldClose(window))
@@ -92,13 +88,8 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram_in)
          /*  transformations matrices */
 
         light_data lightdata;
-        glm::vec3 lightcolor = glm::vec3(.8f, .5f, .3f);
-        lightdata.ambient = lightcolor * lightdata.ambient;
-        lightdata.diffuse = lightcolor * lightdata.diffuse;
-        lightdata.specular = lightcolor * lightdata.specular;
 
-        lightdata.position = glm::vec3(0.f, 500.f, 0.f);
-
+        lightdata.position = glm::vec3(0.f, 0.f, 5.f);
 
 
         Projection = glm::perspective(glm::radians(45.0f), (1024.0f / 768.0f), 1.0f, 100.0f);
@@ -116,10 +107,9 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram_in)
 
         }
 
-
         map.draw(Projection * View, lightdata, cam_eye);
         
-        glm::mat4 Model = importerAssimpTest.translate(glm::vec3(17.0f, 2.0f, -27.0f), glm::mat4(1.0f));
+        glm::mat4 Model = importerAssimpTest.translate(glm::vec3(4.f, 2.f, 0.f), glm::mat4(1.0f));
         //Model = importerAssimpTest.rotate(45.0f * 3.1415 / 180, Model, glm::vec3(1, 0, 0));
    
         importerAssimpTest.draw(Projection * View, lightdata, cam_eye, Model);

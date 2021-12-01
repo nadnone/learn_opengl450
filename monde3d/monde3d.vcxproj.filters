@@ -29,7 +29,7 @@
     <ClInclude Include="headers\GameLoop.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="headers\Shader.h">
+    <ClInclude Include="headers\Shader_texture.h">
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="headers\Misc.h">
@@ -39,6 +39,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="headers\ObjImporter.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\Shader_map.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

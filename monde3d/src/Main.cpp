@@ -1,7 +1,9 @@
 #include <vector>
 #include <chrono>
 
-#include "Shader.h"
+#include "Shader_texture.h"
+#include "Shader_map.h"
+
 #include "GameLoop.h"
 
 int main(void)
@@ -45,12 +47,16 @@ int main(void)
 
     
     //Get the shader program id
-    Shader_Compilation shader_compiler = Shader_Compilation();
-    unsigned int shaderProgram = shader_compiler.getShaderProgramID();
+    unsigned shaderProgram[2];
 
 
+    Shader_texture shader_tex = Shader_texture();
+    shaderProgram[0] = shader_tex.getShaderProgramID();
 
-    //glViewport(0, 0, 640, 480);
+    Shader_map shader_map = Shader_map();
+    shaderProgram[1] = shader_map.getShaderProgramID();
+
+
 
 
     // run the game loop

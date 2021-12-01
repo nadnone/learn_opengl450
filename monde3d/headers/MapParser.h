@@ -30,8 +30,8 @@ private:
 		normals_buffer = 0;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;
-	const float COEFF = 1.0f,
-		COEFF_HAUTEUR = 10.0f;
+	const float COEFF = .5f,
+		COEFF_HAUTEUR = 1000.0f;
 };
 
 MapParser::MapParser(const char* filename)
@@ -217,9 +217,9 @@ MapParser::MapParser(const char* filename)
 
 	// initialisation des donnnée Phong
 	my_obj_data.material.ambiant = glm::vec3(.1f);
-	my_obj_data.material.shininess = 3.2f;
-	my_obj_data.material.diffuse = glm::vec3(1.f);
-	my_obj_data.material.specular = glm::vec3(.5f);
+	my_obj_data.material.shininess = 32.0f;
+	my_obj_data.material.diffuse = glm::vec3(.15f);
+	my_obj_data.material.specular = glm::vec3(.2f);
 	my_obj_data.material.refract_indice = 1.42f;
 
 
@@ -230,6 +230,7 @@ void MapParser::prepare_to_draw(unsigned shaderProgram_in)
 {
 	shaderProgram = shaderProgram_in;
 
+	glUseProgram(shaderProgram);
 
 	// bind the vao
 	glBindVertexArray(vao);

@@ -21,14 +21,14 @@ struct textures_array {
 
 struct Material_data {
     float shininess = 32.0f;
-    float refract_indice = 0.0f;
+    float refract_indice = 1.42f;
     float reflectivity = 0.0f;
     glm::vec3 reflective = glm::vec3(0.f);
-    glm::vec3 ambiant = glm::vec3(0.f);
-    glm::vec3 diffuse = glm::vec3(0.f);
-    glm::vec3 specular = glm::vec3(0.f);
-    glm::vec3 color = glm::vec3(0.f);
+    glm::vec3 ambiant = glm::vec3(0.1f);
+    glm::vec3 diffuse = glm::vec3(0.5f);
+    glm::vec3 specular = glm::vec3(1.f);
     textures_array texture;
+    textures_array texture_lightmap;
 };
 
 struct obj_data {

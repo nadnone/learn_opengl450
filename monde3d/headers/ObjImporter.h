@@ -212,15 +212,14 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 	*/
 
 
-	std::vector<uint8_t> image_data;
-	unsigned error = lodepng::decode(image_data, image_width, image_height, filename_texture);
+	std::vector<uint8_t> image_data_texture;
 
+	unsigned error = lodepng::decode(image_data_texture, image_width, image_height, filename_texture);
 	if (error)
 	{
 		printf("Error lodePNG objimporter: %u", error);
 	}
 
-	
 
 	// load image texture
 
@@ -230,13 +229,13 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 		{
 			for (uint8_t i = 0; i < 4; i++)
 			{
-				mesh_data.material.texture.data[h][(w * 4) + i] = image_data[((w * 4) + i) + (h * image_width * 4)];
+				mesh_data.material.texture.data[h][(w * 4) + i] = image_data_texture[((w * 4) + i) + (h * image_width * 4)];
 
 			}
 		}
 	}
 
-	image_data.clear();
+
 	/* ******************************** */
 
 
@@ -288,8 +287,23 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 
 	glGenerateMipmap(GL_TEXTURE_2D);
 	
-	/* ******************** */
 
+	// Texture lightmap
+	/*
+	glActiveTexture(GL_TEXTURE1);
+
+	glBindTexture(GL_TEXTURE_2D, texture_buffer);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, mesh_data.material.texture_diffuse.data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+	glGenerateMipmap(GL_TEXTURE_2D);
+	*/
+
+
+	/* ******************** */
 
 
 	// bind the normals
@@ -352,6 +366,7 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 
 
 	/* TEXTURE */
 
+	// texture
 	uniLoc = glGetUniformLocation(shaderProgram, "texture0");
 	
 	glActiveTexture(GL_TEXTURE0);
@@ -359,6 +374,15 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 
 
 	glUniform1i(uniLoc, GL_TEXTURE0);
 
+	// lightmap
+	/*
+	uniLoc = glGetUniformLocation(shaderProgram, "texture1");
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture_buffer);
+
+	glUniform1i(uniLoc, GL_TEXTURE1);
+	*/
 
 
 	/* LUMIERE */
@@ -380,6 +404,7 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 
 
 
 	/* PHONG */
+	
 
 	// ambient
 	uniLoc = glGetUniformLocation(shaderProgram, "material.ambient");
@@ -397,7 +422,6 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 
 	uniLoc = glGetUniformLocation(shaderProgram, "material.diffuse");
 	glUniform3f(uniLoc, mesh_data.material.diffuse.x, mesh_data.material.diffuse.y, mesh_data.material.diffuse.z);
 	
-	
 
 
 	// reflective
@@ -407,7 +431,7 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 
 	// reflectivity
 	uniLoc = glGetUniformLocation(shaderProgram, "material.refract_indice");
 	glUniform1f(uniLoc, mesh_data.material.refract_indice);
-
+	
 
 
 	//draw
@@ -415,8 +439,6 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 
 	//glDrawElements(GL_TRIANGLES, my_map_data.map_indices.size(), GL_UNSIGNED_INT, (void*)0);
 
 	
-	// unbind la texture
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 }
 glm::mat4 ObjImporter::translate(glm::vec3 translation_direction, glm::mat4 Model_in)
