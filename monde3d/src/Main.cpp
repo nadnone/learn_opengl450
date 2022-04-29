@@ -50,12 +50,11 @@ int main(void)
     unsigned shaderProgram[2];
 
 
-    Shader_texture shader_tex = Shader_texture();
-    shaderProgram[0] = shader_tex.getShaderProgramID();
+    Shader_texture shader_tex_cube = Shader_texture();
+    shaderProgram[0] = shader_tex_cube.getShaderProgramID();
 
     Shader_map shader_map = Shader_map();
     shaderProgram[1] = shader_map.getShaderProgramID();
-
 
 
 

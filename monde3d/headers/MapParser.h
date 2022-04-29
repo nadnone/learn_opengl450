@@ -147,6 +147,12 @@ MapParser::MapParser(const char* filename)
 				// gestion des couleurs
 				float data = image[positions_colors[order[nb]]];
 
+				/*
+				
+				my_obj_data.map_colors.push_back(255.0f / 255); // couleur de l'eau
+				my_obj_data.map_colors.push_back(.0f / 255); // couleur de l'eau
+				my_obj_data.map_colors.push_back(255.0f / 255); // couleur de l'eau
+				*/
 
 				if (data < 0.07f)
 				{

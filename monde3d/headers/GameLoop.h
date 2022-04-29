@@ -52,10 +52,23 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
 {
     window = window_in;
 
-    // chargement du cube
-    ObjImporter importerAssimpTest("./Assets/cube.dae", "./Assets/textures/cube_texture.png", 1.f);
-    importerAssimpTest.prepare_to_draw(shaderProgram[0]);
+
+    /* 
+        chargement de l'horloge
+    */
+
+    ObjImporter cadran_clock("./Assets/cadran_clock.dae", "./Assets/textures/cadran_clock_texture.png", 6.f);
+    cadran_clock.prepare_to_draw(shaderProgram[0]);
+
+    ObjImporter small_stick_clock("./Assets/small_stick_clock.dae", "./Assets/textures/cube_texture.png", .25f);
+    small_stick_clock.prepare_to_draw(shaderProgram[0]);
+
+    ObjImporter big_stick_clock("./Assets/big_stick_clock.dae", "./Assets/textures/cube_texture.png", .25f);
+    big_stick_clock.prepare_to_draw(shaderProgram[0]);
     
+    // --------------------------
+
+
     // initialisation des events Claviers
     Input_Event inputs(window);
 
@@ -101,28 +114,67 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
         View = glm::lookAt(camera_Pos_Angle.position, cam_eye, glm::vec3(0.0f, 1.0f, 0.0f));
         /* ********************* */
 
-        if (time > 2)
-        {
-            printf("X: %f Y: %f Z: %f\n", camera_Pos_Angle.position.x, camera_Pos_Angle.position.y, camera_Pos_Angle.position.z);
 
-        }
+
 
         map.draw(Projection * View, lightdata, cam_eye);
+
+
+
+        /*
+            Horloge
+        */
+
+        glm::mat4 Model = glm::mat4(1.0f);
+
+
+        Model = cadran_clock.translate(glm::vec3(0.f, 6.f, 0.f), Model);
+        Model = cadran_clock.rotate(90.f * 3.1415f / 180.f, Model, glm::vec3(0.f, 0.f, 1.f));
+        cadran_clock.draw(Projection * View, lightdata, cam_eye, Model);
+
+
+        Model = big_stick_clock.translate(glm::vec3(0.f, 0.f, 0.f), Model);
+        Model = big_stick_clock.rotate(90.f * 3.1415f / 180.f, Model, glm::vec3(0.f, 0.f, 1.f));
+
+        /*
+            spin minutes stick
+        */
+        float rayon_spin = .5f;
+
+        float v_angular = -(1.f/60.f / rayon_spin) * time * 60;
+
+        // cos = adj / hyp; adj = hyp * cos
+        // sin = opp / hyp; opp = hyp * sin
+
+        float x_stick = rayon_spin * glm::cos(v_angular);
+        float y_stick = rayon_spin * glm::sin(v_angular);
+
+        Model = big_stick_clock.translate(glm::vec3(0.f, x_stick, y_stick), Model);
+        Model = big_stick_clock.rotate(v_angular, Model, glm::vec3(1.f, 0.f, 0.f));
+
+        big_stick_clock.draw(Projection * View, lightdata, cam_eye, Model);
+
+
+        // -----------------------
         
-        glm::mat4 Model = importerAssimpTest.translate(glm::vec3(4.f, 2.f, 0.f), glm::mat4(1.0f));
-        //Model = importerAssimpTest.rotate(45.0f * 3.1415 / 180, Model, glm::vec3(1, 0, 0));
-   
-        importerAssimpTest.draw(Projection * View, lightdata, cam_eye, Model);
+        /*
+            spin hours stick
+        */
+        
+        float big_stick_tick = v_angular / 12;
+
+        v_angular = -(1.f/ rayon_spin) * big_stick_tick;
+
+        x_stick = rayon_spin * glm::cos(v_angular);
+        y_stick = rayon_spin * glm::sin(v_angular);
+
+        Model = small_stick_clock.translate(glm::vec3(0.f, x_stick, y_stick), Model);
+        Model = small_stick_clock.rotate(v_angular, Model, glm::vec3(1.f, 0.f, 0.f));
+
+        small_stick_clock.draw(Projection * View, lightdata, cam_eye, Model);
+
+        // -----------------------
  
-        //Model = sphere_2.translate(glm::vec3(0.0f, translationLoop, 0.0f), glm::mat4(1.0f));
-        //Model = sphere_2.rotate(deltaTickLoop / 3.1415f / 10.0f, Model, glm::vec3(0, 1, 0));
-        //sphere_2.draw(shaderProgram, Projection * View);
-
-
-        //glm::mat4 Model = cube_3.rotate(deltaTickLoop / 3.1415f / 10.0f, glm::mat4(1.0f), glm::vec3(1, 1, 1));
-        //cube_3.draw(shaderProgram, Projection * View);
-
-
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

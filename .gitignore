@@ -369,5 +369,7 @@ monde3d/src/glad.c
 *.data_map
 monde3d/src/lodepng.cpp
 monde3d/Assets/cookie.dae
-*.dae
 monde3d/Assets/textures/TextureCookie.png
+monde3d/Assets/galette.dae
+monde3d/Assets/fork.dae
+monde3d/Assets/cookie_modified.dae

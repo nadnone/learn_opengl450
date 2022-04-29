@@ -21,9 +21,6 @@ Shader_texture::Shader_texture()
     /*
     GLSL vertex shaderand fragment shader
     */
-
-    //vertexshader
-    //const char* vertexshaderGLSL = "#version 450 core\nlayout(location = 0) in vec3 aPos;\nvoid main()\n{\ngl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0f);\n}";
             const char* vertexshaderGLSL = R"glsl(
                 #version 450 core
 
@@ -124,7 +121,7 @@ Shader_texture::Shader_texture()
                     vec3 R = -reflect(-lightDir, eyeNormal);
 
                     float angle = max(dot(eyeNormal, R), 0.0f);
-                    float spec = pow(angle, material.shininess); 
+                    float spec = pow(angle, 32.0f); // 32 = material.shininess
                     vec3 specular = light.specular * spec * material.specular;
 
                     /* ******************** */
