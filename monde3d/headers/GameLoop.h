@@ -66,6 +66,10 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
     ObjImporter big_stick_clock("./Assets/big_stick_clock.dae", "./Assets/textures/cube_texture.png", .25f);
     big_stick_clock.prepare_to_draw(shaderProgram[0]);
     
+    ObjImporter sec_stick_clock("./Assets/seconds_stick_clock.dae", "./Assets/textures/TextureCookie.png", 0.25f);
+    sec_stick_clock.prepare_to_draw(shaderProgram[0]);
+
+
     // --------------------------
 
 
@@ -117,7 +121,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
 
 
 
-        map.draw(Projection * View, lightdata, cam_eye);
+       // map.draw(Projection * View, lightdata, cam_eye);
 
 
 
@@ -133,48 +137,83 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
         cadran_clock.draw(Projection * View, lightdata, cam_eye, Model);
 
 
-        Model = big_stick_clock.translate(glm::vec3(0.f, 0.f, 0.f), Model);
-        Model = big_stick_clock.rotate(90.f * 3.1415f / 180.f, Model, glm::vec3(0.f, 0.f, 1.f));
+        Model = small_stick_clock.translate(glm::vec3(0.f, 0.f, 0.f), Model);
+        Model = small_stick_clock.rotate(90.f * 3.1415f / 180.f, Model, glm::vec3(0.f, 0.f, 1.f));
+        Model = small_stick_clock.rotate(3.1415f, Model, glm::vec3(1.f, 0.f, 0.f));
+
+        //small_stick_clock.draw(Projection * View, lightdata, cam_eye, Model);
 
         /*
-            spin minutes stick
+            spin hours stick
+        
         */
-        float rayon_spin = .5f;
 
-        float v_angular = -(1.f/60.f / rayon_spin) * time * 60;
+        int64_t timestamp = (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() + (2*3600)) % 43200;
+        
+        float v_angular = -(2 * 3.1415f) / 43200;
+        v_angular *= timestamp;
+
 
         // cos = adj / hyp; adj = hyp * cos
         // sin = opp / hyp; opp = hyp * sin
 
-        float x_stick = rayon_spin * glm::cos(v_angular);
-        float y_stick = rayon_spin * glm::sin(v_angular);
-
-        Model = big_stick_clock.translate(glm::vec3(0.f, x_stick, y_stick), Model);
-        Model = big_stick_clock.rotate(v_angular, Model, glm::vec3(1.f, 0.f, 0.f));
-
-        big_stick_clock.draw(Projection * View, lightdata, cam_eye, Model);
-
-
-        // -----------------------
-        
-        /*
-            spin hours stick
-        */
-        
-        float big_stick_tick = v_angular / 12;
-
-        v_angular = -(1.f/ rayon_spin) * big_stick_tick;
-
-        x_stick = rayon_spin * glm::cos(v_angular);
-        y_stick = rayon_spin * glm::sin(v_angular);
+        float x_stick = glm::cos(v_angular);
+        float y_stick = glm::sin(v_angular);
 
         Model = small_stick_clock.translate(glm::vec3(0.f, x_stick, y_stick), Model);
         Model = small_stick_clock.rotate(v_angular, Model, glm::vec3(1.f, 0.f, 0.f));
 
         small_stick_clock.draw(Projection * View, lightdata, cam_eye, Model);
 
+
+        printf("%i\n", timestamp);
+
+        
+        // ********************
+
+
+        Model = big_stick_clock.rotate(-v_angular, Model, glm::vec3(1.f, 0.f, 0.f));
+        Model = big_stick_clock.translate(glm::vec3(0.f, -x_stick, -y_stick), Model);
+        //big_stick_clock.draw(Projection * View, lightdata, cam_eye, Model);
+
+        // -----------------------
+        /*
+            spin minutes stick
+        */
+        v_angular = -(2 * 3.1415f) / 3600;
+        v_angular *= timestamp;
+
+        x_stick = glm::cos(v_angular);
+        y_stick = glm::sin(v_angular);
+
+        Model = big_stick_clock.translate(glm::vec3(0.f, x_stick, y_stick), Model);
+        Model = big_stick_clock.rotate(v_angular, Model, glm::vec3(1.f, 0.f, 0.f));
+
+        big_stick_clock.draw(Projection * View, lightdata, cam_eye, Model);
+        
         // -----------------------
  
+
+        Model = sec_stick_clock.rotate(-v_angular, Model, glm::vec3(1.f, 0.f, 0.f));
+        Model = sec_stick_clock.translate(glm::vec3(0.f, -x_stick, -y_stick), Model);
+        //sec_stick_clock.draw(Projection* View, lightdata, cam_eye, Model);
+
+        /*
+            spin seconds stick
+        */
+        v_angular = -(2 * 3.1415f) / 60;
+        v_angular *= timestamp;
+
+        x_stick = glm::cos(v_angular);
+        y_stick = glm::sin(v_angular);
+
+        Model = sec_stick_clock.translate(glm::vec3(0.f, x_stick, y_stick), Model);
+        Model = sec_stick_clock.rotate(v_angular, Model, glm::vec3(1.f, 0.f, 0.f));
+
+        sec_stick_clock.draw(Projection* View, lightdata, cam_eye, Model);
+
+        // -----------------------
+
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
