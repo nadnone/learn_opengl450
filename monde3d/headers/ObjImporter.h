@@ -11,7 +11,8 @@
 class ObjImporter
 {
 public:
-	ObjImporter(std::string filename, std::string filename_texture_in, float scale);
+	//ObjImporter(std::string filename, std::string filename_texture_in, float scale);
+	ObjImporter(std::string filename, float scale);
 	~ObjImporter();
 
 
@@ -145,6 +146,48 @@ void ObjImporter::processNode(aiNode* node, const aiScene* scene)
 
 }
 
+ObjImporter::ObjImporter(std::string filename, float scale)
+{
+	coeff = scale;
+
+	// generate objects buffers
+	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &normals_buffer);
+	//glGenBuffers(1, &indices_buffer);
+	glGenVertexArrays(1, &vao);
+	glGenVertexArrays(1, &texturecoord_buffer);
+	glGenTextures(1, &texture_buffer);
+
+
+
+	Assimp::Importer importer;
+
+	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate);
+
+
+
+
+	if (!scene && !importer.GetErrorString() && !(scene->mNumMeshes > 0))
+	{
+		printf("Erreur importation: %s\n", importer.GetErrorString());
+		exit(1);
+	}
+
+
+	aiNode* node = scene->mRootNode;
+
+	if (!node)
+	{
+		exit(1);
+	}
+
+	//printf("%i\n", node->mNumChildren);
+
+	processNode(node, scene);
+
+}
+
+/*
 ObjImporter::ObjImporter(std::string filename, std::string filename_texture_in, float scale)
 {
 
@@ -193,6 +236,7 @@ ObjImporter::ObjImporter(std::string filename, std::string filename_texture_in, 
 
 
 }
+*/
 
 ObjImporter::~ObjImporter()
 {
@@ -211,7 +255,7 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 		TEXTURES
 	*/
 
-
+	/*
 	std::vector<uint8_t> image_data_texture;
 
 	unsigned error = lodepng::decode(image_data_texture, image_width, image_height, filename_texture);
@@ -235,9 +279,8 @@ void ObjImporter::prepare_to_draw(unsigned int shaderProgram_in)
 		}
 	}
 
-
+	*/
 	/* ******************************** */
-
 
 	/*
 		Shader Program

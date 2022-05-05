@@ -78,7 +78,7 @@ Shader_texture::Shader_texture()
                 uniform Material material;
 
                 
-                uniform sampler2D texture0;
+                //uniform sampler2D texture0;
 
 
                 struct Light {
@@ -95,12 +95,12 @@ Shader_texture::Shader_texture()
                 void main()
                 {
                     // texture
-                    vec3 texture = vec3(texture(texture0, textCoords));
+                    //vec3 texture = vec3(texture(texture0, textCoords));
 
 
                     // AMBIENT
                     
-                    vec3 ambient = light.ambient * material.ambient;
+                    vec3 ambient = light.ambient + material.ambient;
                     
                     /* ******************* */                    
                     
@@ -110,7 +110,7 @@ Shader_texture::Shader_texture()
                     vec3 norm = normalize(vertexNormals);
                     vec3 lightDir = normalize(light.position - fragPos);
                     float diffuseDot = max(dot( norm, lightDir ),  0.0f );            
-                    vec3 diffuse = light.diffuse * diffuseDot * material.diffuse;
+                    vec3 diffuse = (light.diffuse * diffuseDot) + material.diffuse;
 
                     /* ******************** */
 
@@ -121,13 +121,13 @@ Shader_texture::Shader_texture()
                     vec3 R = -reflect(-lightDir, eyeNormal);
 
                     float angle = max(dot(eyeNormal, R), 0.0f);
-                    float spec = pow(angle, 32.0f); // 32 = material.shininess
-                    vec3 specular = light.specular * spec * material.specular;
+                    float spec = pow(angle, material.shininess);
+                    vec3 specular = (light.specular * spec) + material.specular;
 
                     /* ******************** */
 
                     // result
-                    vec3 result = (ambient + diffuse + specular) + texture;
+                    vec3 result = (ambient + diffuse + specular);
 	                FragColor = vec4(result, 1.0f);
                 }
         )glsl";

@@ -57,16 +57,16 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
         chargement de l'horloge
     */
 
-    ObjImporter cadran_clock("./Assets/cadran_clock.dae", "./Assets/textures/cadran_clock_texture.png", 6.f);
+    ObjImporter cadran_clock("./Assets/cadran_clock.dae", 6.f);
     cadran_clock.prepare_to_draw(shaderProgram[0]);
 
-    ObjImporter small_stick_clock("./Assets/small_stick_clock.dae", "./Assets/textures/cube_texture.png", .25f);
+    ObjImporter small_stick_clock("./Assets/small_stick_clock.dae", .25f);
     small_stick_clock.prepare_to_draw(shaderProgram[0]);
 
-    ObjImporter big_stick_clock("./Assets/big_stick_clock.dae", "./Assets/textures/cube_texture.png", .25f);
+    ObjImporter big_stick_clock("./Assets/big_stick_clock.dae", .25f);
     big_stick_clock.prepare_to_draw(shaderProgram[0]);
     
-    ObjImporter sec_stick_clock("./Assets/seconds_stick_clock.dae", "./Assets/textures/TextureCookie.png", 0.25f);
+    ObjImporter sec_stick_clock("./Assets/seconds_stick_clock.dae", 0.25f);
     sec_stick_clock.prepare_to_draw(shaderProgram[0]);
 
 
@@ -118,10 +118,15 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
         View = glm::lookAt(camera_Pos_Angle.position, cam_eye, glm::vec3(0.0f, 1.0f, 0.0f));
         /* ********************* */
 
+        glm::mat4 Model = glm::mat4(1.0f);
 
 
+        /*
+            TERRAIN
+        */
+        map.draw(Projection * View, lightdata, cam_eye);
 
-       // map.draw(Projection * View, lightdata, cam_eye);
+        // **************
 
 
 
@@ -129,7 +134,6 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
             Horloge
         */
 
-        glm::mat4 Model = glm::mat4(1.0f);
 
 
         Model = cadran_clock.translate(glm::vec3(0.f, 6.f, 0.f), Model);
@@ -166,7 +170,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
         small_stick_clock.draw(Projection * View, lightdata, cam_eye, Model);
 
 
-        printf("%i\n", timestamp);
+        printf("%i\n", (int)timestamp);
 
         
         // ********************
