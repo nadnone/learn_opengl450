@@ -3,6 +3,7 @@
 
 #include "Shader_texture.h"
 #include "Shader_map.h"
+#include "Shader_Animated.h"
 
 #include "GameLoop.h"
 
@@ -47,7 +48,7 @@ int main(void)
 
     
     //Get the shader program id
-    unsigned shaderProgram[2];
+    unsigned shaderProgram[3];
 
 
     Shader_texture shader_tex_cube = Shader_texture();
@@ -56,7 +57,8 @@ int main(void)
     Shader_map shader_map = Shader_map();
     shaderProgram[1] = shader_map.getShaderProgramID();
 
-
+    Shader_Animated shader_animated = Shader_Animated();
+    shaderProgram[2] = shader_animated.getShaderProgramID();
 
     // run the game loop
     GameLoop gameloop = GameLoop();

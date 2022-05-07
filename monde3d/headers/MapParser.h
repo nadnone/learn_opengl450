@@ -30,8 +30,8 @@ private:
 		normals_buffer = 0;
 	glm::mat4 Model;
 	glm::mat4 ViewProjection;
-	const float COEFF = .5f,
-		COEFF_HAUTEUR = 1000.0f;
+	const float COEFF = 1.f,
+		COEFF_HAUTEUR = 100.f;
 };
 
 MapParser::MapParser(const char* filename)
@@ -147,12 +147,6 @@ MapParser::MapParser(const char* filename)
 				// gestion des couleurs
 				float data = image[positions_colors[order[nb]]];
 
-				/*
-				
-				my_obj_data.map_colors.push_back(255.0f / 255); // couleur de l'eau
-				my_obj_data.map_colors.push_back(.0f / 255); // couleur de l'eau
-				my_obj_data.map_colors.push_back(255.0f / 255); // couleur de l'eau
-				*/
 
 				if (data < 0.07f)
 				{

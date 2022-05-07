@@ -240,8 +240,8 @@ ObjImporter::ObjImporter(std::string filename, std::string filename_texture_in, 
 
 ObjImporter::~ObjImporter()
 {
-	glDeleteTextures(1, &texture_buffer);
 	glDeleteBuffers(1, &vbo);
+	glDeleteTextures(1, &texture_buffer);
 	glDeleteBuffers(1, &texturecoord_buffer);
 	glDeleteBuffers(1, &normals_buffer);
 	glDeleteBuffers(1, &vao);
@@ -410,6 +410,7 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 
 	/* TEXTURE */
 
 	// texture
+	/*
 	uniLoc = glGetUniformLocation(shaderProgram, "texture0");
 	
 	glActiveTexture(GL_TEXTURE0);
@@ -418,15 +419,15 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 
 	glUniform1i(uniLoc, GL_TEXTURE0);
 
 	// lightmap
-	/*
+	
 	uniLoc = glGetUniformLocation(shaderProgram, "texture1");
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture_buffer);
 
 	glUniform1i(uniLoc, GL_TEXTURE1);
-	*/
 
+	*/
 
 	/* LUMIERE */
 
@@ -484,6 +485,7 @@ void ObjImporter::draw(glm::mat4 ViewProjection_in, light_data light, glm::vec3 
 	
 
 }
+
 glm::mat4 ObjImporter::translate(glm::vec3 translation_direction, glm::mat4 Model_in)
 {
 	Model = glm::translate(Model_in, translation_direction);

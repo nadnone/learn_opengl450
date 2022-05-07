@@ -28,8 +28,10 @@
     <ClInclude Include="headers\Input_event.h" />
     <ClInclude Include="headers\MapParser.h" />
     <ClInclude Include="headers\Misc.h" />
+    <ClInclude Include="headers\ObjAnimated.h" />
     <ClInclude Include="headers\ObjImporter.h" />
     <ClInclude Include="headers\ObjReader.h" />
+    <ClInclude Include="headers\Shader_Animated.h" />
     <ClInclude Include="headers\Shader_map.h" />
     <ClInclude Include="headers\Shader_texture.h" />
   </ItemGroup>

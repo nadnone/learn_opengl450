@@ -3,49 +3,69 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 
-class Shader_texture
+class Shader_Animated
 {
 public:
-	Shader_texture();
-	~Shader_texture();
-    unsigned int getShaderProgramID();
+	Shader_Animated();
+	~Shader_Animated();
+	unsigned int getShaderProgramID();
 
 private:
-    unsigned int shaderProgram = NULL;
+	unsigned int shaderProgram = NULL;
 };
 
-Shader_texture::Shader_texture()
+
+Shader_Animated::Shader_Animated()
 {
 
 
     /*
     GLSL vertex shaderand fragment shader
     */
-            const char* vertexshaderGLSL = R"glsl(
+    const char* vertexshaderGLSL = R"glsl(
                 #version 450 core
 
                 layout(location = 0) in vec3 modelPos;
-                layout(location = 1) in vec3 colorDataIn;
                 layout(location = 2) in vec3 normalsDataIn;
                 layout(location = 3) in vec2 textCoordsIn;
+                layout(location = 4) in ivec4 boneIds;
+                layout(location = 5) in vec4 weights;
 
                 uniform mat4 Model;
-                uniform mat4 ViewProjection;
+                uniform mat4 View;
+                uniform mat4 Projection;
 
-                out vec3 vertexNormals;
-                out vec3 fragPos;
-                out vec3 colorsVertex;
+                const int MAX_BONES = 5;
+                const int MAX_BONE_INFLUENCE = 4;                
+                
+                uniform mat4 finalBonesMatrices[MAX_BONES];
+
                 out vec2 textCoords;
 
                 void main()
                 {
-                    gl_Position = ViewProjection * Model * vec4(modelPos, 1.0f);
-                    vertexNormals = normalsDataIn;
+                    vec4 totalPosition = vec4(0.f);
+                    for(int i = 0; i < MAX_BONE_INFLUENCE; i++)
+                    {
+                        if(boneIds[i] == -1)
+                        {
+                            continue;
+                        }
+                        if(boneIds[i] >= MAX_BONES)
+                        {
+                            totalPosition = vec4(modelPos, 1.0f);
+                            break;
+                        }
+                        
+                        vec4 localPosition = finalBonesMatrices[boneIds[i]] * vec4(modelPos, 1.0f);
+                        totalPosition += localPosition * weights[i];
+                        vec3 localNormal = mat3(finalBonesMatrices[boneIds[i]]) * normalsDataIn;
+                    }
 
-                    fragPos = vec3(Model * vec4(modelPos, 1.0f));
-
-                    colorsVertex = colorDataIn;
+                    mat4 viewModel = View * Model;
+                    gl_Position = Projection * viewModel * totalPosition;
                     textCoords = textCoordsIn;
+                    
                 }
                 )glsl";
     unsigned int vertexShader;
@@ -54,11 +74,10 @@ Shader_texture::Shader_texture()
     glCompileShader(vertexShader);
 
     const char* fragmentshaderGLSL = R"glsl(
-                #version 450 core
+                 #version 450 core
 
                 in vec3 vertexNormals;
                 in vec3 fragPos;
-                in vec3 colorsVertex;
                 in vec2 textCoords;
 
                 out vec4 FragColor;
@@ -77,10 +96,6 @@ Shader_texture::Shader_texture()
                 };
                 uniform Material material;
 
-                
-                //uniform sampler2D texture0;
-
-
                 struct Light {
                     vec3 diffuse;
                     vec3 specular;
@@ -89,13 +104,14 @@ Shader_texture::Shader_texture()
                 };
                 uniform Light light;               
             
+                uniform sampler2D texture0;
 
 
 
                 void main()
                 {
                     // texture
-                    //vec3 texture = vec3(texture(texture0, textCoords));
+                    vec3 texture = vec3(texture(texture0, textCoords));
 
 
                     // AMBIENT
@@ -127,7 +143,7 @@ Shader_texture::Shader_texture()
                     /* ******************** */
 
                     // result
-                    vec3 result = (ambient + diffuse + specular);
+                    vec3 result = (ambient + diffuse + specular) + texture;
 	                FragColor = vec4(result, 1.0f);
                 }
         )glsl";
@@ -145,8 +161,7 @@ Shader_texture::Shader_texture()
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &isCompiled);
     if (isCompiled == GL_FALSE)
     {
-        // Exit with failure.
-        glDeleteShader(fragmentShader); // Don't leak the shader.
+        glDeleteShader(fragmentShader);
         printf("FragmentShader Error\n");
         exit(2);
     }
@@ -154,8 +169,7 @@ Shader_texture::Shader_texture()
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &isCompiled);
     if (isCompiled == GL_FALSE)
     {
-        // Exit with failure.
-        glDeleteShader(vertexShader); // Don't leak the shader.
+        glDeleteShader(vertexShader);
         printf("VertexShader Error\n");
         exit(2);
     }
@@ -175,14 +189,14 @@ Shader_texture::Shader_texture()
     glDeleteShader(fragmentShader);
 
     /* ***************************** */
-
 }
 
-unsigned int Shader_texture::getShaderProgramID()
+unsigned int Shader_Animated::getShaderProgramID()
 {
-    return shaderProgram;
+	return shaderProgram;
 }
 
-Shader_texture::~Shader_texture()
+Shader_Animated::~Shader_Animated()
 {
+
 }

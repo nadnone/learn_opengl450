@@ -129,9 +129,6 @@ Shader_map::Shader_map()
                 }
         )glsl";
 
-    // TODO Comprendre le lighting 
-    // TODO PHONG model for textures
-
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentshaderGLSL, NULL);

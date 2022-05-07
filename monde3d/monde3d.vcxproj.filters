@@ -44,5 +44,11 @@
     <ClInclude Include="headers\Shader_map.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="headers\Shader_Animated.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\ObjAnimated.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

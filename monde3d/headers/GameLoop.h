@@ -16,6 +16,7 @@
 
 #include "ObjReader.h"
 #include "ObjImporter.h"
+#include "ObjAnimated.h"
 
 
 class GameLoop
@@ -76,9 +77,19 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
     // initialisation des events Claviers
     Input_Event inputs(window);
 
-    // initialisation de la map
+    //initialisation de la map
     MapParser map("./Assets/map/grayscale_heightmap.png");
     map.prepare_to_draw(shaderProgram[1]);
+
+
+    /*
+        Chargement de l'objet animé
+    */
+
+    ObjAnimated objanimated = ObjAnimated("./Assets/human.fbx", 1.0f);
+    objanimated.prepare_to_draw(shaderProgram[2], "./Assets/textures/human.jpg");
+
+    // *****************************
 
 
     while (!glfwWindowShouldClose(window))
@@ -137,6 +148,7 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
 
 
         Model = cadran_clock.translate(glm::vec3(0.f, 6.f, 0.f), Model);
+        Model = cadran_clock.translate(glm::vec3(0.f, 6.f, 14.f), Model);
         Model = cadran_clock.rotate(90.f * 3.1415f / 180.f, Model, glm::vec3(0.f, 0.f, 1.f));
         cadran_clock.draw(Projection * View, lightdata, cam_eye, Model);
 
@@ -169,8 +181,6 @@ void GameLoop::run(GLFWwindow* window_in, unsigned shaderProgram[2])
 
         small_stick_clock.draw(Projection * View, lightdata, cam_eye, Model);
 
-
-        printf("%i\n", (int)timestamp);
 
         
         // ********************
